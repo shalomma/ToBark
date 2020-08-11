@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from trainer import Trainer, TrainConfig
 from dataset import UrbanSound8K
-from network import Encoder
+from network import WaveCNN
 
 
 if __name__ == '__main__':
@@ -12,9 +12,9 @@ if __name__ == '__main__':
     metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
 
     epochs = 100
-    batch_size = 256
+    batch_size = 128
     learning_rate = 1e-3
-    in_channels = 2
+    in_channels = 1
     num_hidden = 128
     num_residual_hidden = 32
     num_residual_layers = 2
@@ -22,9 +22,9 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
-    model = Encoder(in_channels, num_hidden, num_residual_layers, num_residual_hidden)
+    model = WaveCNN(in_channels, num_residual_layers)
     optimizer = Adam(params=model.parameters(), lr=learning_rate)
-    criterion = torch.nn.CrossEntropyLoss(reduction='sum')
+    criterion = torch.nn.CrossEntropyLoss(reduction='mean')
     data = dict()
     data['train'] = UrbanSound8K(metadata_file, root_dir, transform=torchaudio.transforms.Spectrogram())
     data['val'] = UrbanSound8K(metadata_file, root_dir, transform=torchaudio.transforms.Spectrogram())

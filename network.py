@@ -33,33 +33,62 @@ class ResidualStack(nn.Module):
         return F.relu(x)
 
 
-class Encoder(nn.Module):
-    def __init__(self, in_channels, num_hidden, num_residual_layers, num_residual_hidden):
-        super(Encoder, self).__init__()
+class WaveCNN(nn.Module):
+    def __init__(self, in_channels, num_residual_layers):
+        super(WaveCNN, self).__init__()
 
         self._conv_1 = nn.Conv2d(in_channels=in_channels,
-                                 out_channels=num_hidden // 2,
-                                 kernel_size=4,
-                                 stride=2, padding=1)
-        self._conv_2 = nn.Conv2d(in_channels=num_hidden // 2,
-                                 out_channels=num_hidden,
-                                 kernel_size=4,
-                                 stride=2, padding=1)
-        self._conv_3 = nn.Conv2d(in_channels=num_hidden,
-                                 out_channels=num_hidden,
+                                 out_channels=1,
                                  kernel_size=3,
-                                 stride=1, padding=1)
-        self._residual_stack = ResidualStack(in_channels=num_hidden,
-                                             num_hidden=num_hidden,
+                                 stride=2, padding=0)
+        self._pool_1 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
+        self._conv_2 = nn.Conv2d(in_channels=1,
+                                 out_channels=1,
+                                 kernel_size=5,
+                                 stride=2, padding=0)
+        self._pool_2 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
+        self._conv_3 = nn.Conv2d(in_channels=1,
+                                 out_channels=1,
+                                 kernel_size=5,
+                                 stride=2, padding=0)
+        self._pool_3 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
+        self._conv_4 = nn.Conv2d(in_channels=1,
+                                 out_channels=1,
+                                 kernel_size=5,
+                                 stride=2, padding=0)
+        self._pool_4 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
+        self._conv_5 = nn.Conv2d(in_channels=1,
+                                 out_channels=1,
+                                 kernel_size=5,
+                                 stride=2, padding=0)
+
+        self._residual_stack = ResidualStack(in_channels=1,
+                                             num_hidden=1,
                                              num_residual_layers=num_residual_layers,
-                                             num_residual_hidden=num_residual_hidden)
+                                             num_residual_hidden=1)
+        self.fc = nn.Linear(22, 10)
 
     def forward(self, inputs):
-        x = self._conv_1(inputs)
+        batch, h, w = inputs.shape
+        x = inputs.view(batch, 1, h, w)
+        x = self._conv_1(x)
         x = F.relu(x)
+        x = self._pool_1(x)
 
         x = self._conv_2(x)
         x = F.relu(x)
+        x = self._pool_2(x)
 
         x = self._conv_3(x)
-        return self._residual_stack(x)
+        x = F.relu(x)
+        x = self._pool_3(x)
+
+        x = self._conv_4(x)
+        x = F.relu(x)
+        x = self._pool_4(x)
+
+        x = self._conv_5(x)
+        x = self._residual_stack(x)
+        x = x.view(batch, -1)
+        x = self.fc(x)
+        return x
