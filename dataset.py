@@ -2,9 +2,7 @@ import os
 import pandas as pd
 import torchaudio
 import torch
-import torch.nn.functional as F
 import torch.utils.data as data
-from sklearn.preprocessing import LabelBinarizer
 
 
 class UrbanSound8K(data.Dataset):
@@ -18,7 +16,7 @@ class UrbanSound8K(data.Dataset):
             transform (callable, optional): Optional transform to be applied on a sample.
         """
         self.metadata = pd.read_csv(metadata_file)
-        self.y = torch.tensor(LabelBinarizer().fit_transform(self.metadata['classID']))
+        self.y = torch.tensor(self.metadata['classID'])
         self.root_dir = root_dir
         self.transform = transform
         self.max_frames = 176400
@@ -34,8 +32,11 @@ class UrbanSound8K(data.Dataset):
         file_name = os.path.join(os.path.abspath(self.root_dir), 'fold' + str(row['fold']) + '/',
                                  row['slice_file_name'])
         wave, sample_rate = torchaudio.load(file_name)
-        length = wave.shape[1]
-        wave = F.pad(wave, [0, self.max_frames - length], value=wave.mean())
+        wave = wave[0][:self.max_frames]
+        length = wave.shape[0]
+        t = torch.zeros(self.max_frames)
+        t[:length] = t[:length] + wave
+        wave = t
 
         if self.transform:
             wave = self.transform(wave)
@@ -51,4 +52,3 @@ if __name__ == '__main__':
     root = 'UrbanSound8K/audio'
     data = UrbanSound8K(path, root)
     sample = next(iter(data))
-    sample
