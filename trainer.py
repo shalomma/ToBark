@@ -21,8 +21,6 @@ class Trainer:
         for epoch in range(self.n_epochs):
             for phase in self.phases:
                 running_loss = 0.0
-                running_labels = torch.tensor([]).to(self.device)
-                running_outputs = torch.tensor([]).to(self.device)
                 if phase == 'train':
                     self.config.model.train()
                 else:
@@ -37,13 +35,10 @@ class Trainer:
 
                         loss = self.config.criterion(outputs, labels)
                         if phase == 'train':
-                            loss += self.config.l2_regularizer()
                             loss.backward()
                             self.config.optimizer.step()
 
                     running_loss += loss.item()
-                    running_labels = torch.cat((running_labels, labels))
-                    running_outputs = torch.cat((running_outputs, outputs))
+                    print(f'{phase}: {running_loss:.4f}')
 
-                loss = running_loss / len(self.config.fetchers[phase])
-                print(f'{phase}: {loss:.4f}')
+                # loss = running_loss / len(self.config.fetchers[phase])
