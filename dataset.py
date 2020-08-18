@@ -8,7 +8,8 @@ import torch.utils.data as data
 class UrbanSound8K(data.Dataset):
     def __init__(self, metadata_file, root_dir, phase='train', transform=None):
         df = pd.read_csv(metadata_file)
-        self.metadata = df[df['fold'] == 1] if phase == 'train' else df[df['fold'] == 10]
+        mask_val = df['fold'] == 10
+        self.metadata = df[~mask_val] if phase == 'train' else df[mask_val]
         self.y = torch.tensor(self.metadata['classID'].values)
         self.root_dir = root_dir
         self.transform = transform
