@@ -21,9 +21,7 @@ class Trainer:
         for epoch in range(self.n_epochs):
             to_print = ''
             for phase in self.phases:
-                running_loss = 0.0
                 self.config.model.train() if phase == 'train' else self.config.model.eval()
-                # for data in self.config.fetchers[phase]:
                 data = next(iter(self.config.fetchers[phase]))
                 inputs, labels = data['wave'], data['class']
                 self.config.optimizer.zero_grad()
@@ -36,6 +34,6 @@ class Trainer:
                         loss.backward()
                         self.config.optimizer.step()
 
-                running_loss += loss.item()
-                to_print += f'{phase}: {running_loss:.4f}\t'
+                acc = torch.eq(labels, outputs.argmax(axis=1)).numpy().mean()
+                to_print += f'{phase} loss: {loss.item():.4f} acc: {acc:.4f}\t'
             print(to_print)
