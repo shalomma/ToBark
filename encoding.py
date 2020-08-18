@@ -11,16 +11,17 @@ df = pd.read_csv(metadata_file)
 
 n_files = 100
 
-for f in df['fold'].unique():
+for f in sorted(df['fold'].unique()):
     print(f'Fold: {f}')
     files = []
     srs = []
-    for idx, row in df[df['fold'] == f].iterrows():
+    df_inner = df[df['fold'] == f].reset_index(drop=True)
+    for idx, row in df_inner.iterrows():
         file_name = os.path.join(os.path.abspath(root_dir), 'fold' + str(row['fold']) + '/', row['slice_file_name'])
         audio, sr = sf.read(file_name)
         files.append(audio)
         srs.append(sr)
-        if (idx + 1) % n_files == 0:
+        if ((idx % n_files == 0) and (idx != 0)) or (idx + 1 == len(df_inner)):
             emb_list, ts_list = openl3.get_audio_embedding(files, srs, content_type="env", batch_size=256)
             encode_dataset = torch.tensor([])
             for e in emb_list:
