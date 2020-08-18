@@ -9,7 +9,7 @@ class UrbanSound8K(data.Dataset):
     def __init__(self, metadata_file, root_dir, phase='train', transform=None):
         df = pd.read_csv(metadata_file)
         self.metadata = df[df['fold'] == 1] if phase == 'train' else df[df['fold'] == 10]
-        self.y = torch.tensor(self.metadata['classID'])
+        self.y = torch.tensor(self.metadata['classID'].values)
         self.root_dir = root_dir
         self.transform = transform
 
@@ -23,7 +23,7 @@ class UrbanSound8K(data.Dataset):
         row = self.metadata.iloc[idx]
         file_name = os.path.join(os.path.abspath(self.root_dir), 'fold' + str(row['fold']) + '/',
                                  row['slice_file_name'])
-        wave, sample_rate = torchaudio.load(file_name)
+        wave, sample_rate = torchaudio.backend.sox_backend.load(file_name)
         wave = wave[0]
 
         if self.transform:
