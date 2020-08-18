@@ -18,8 +18,8 @@ class Trainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def train(self):
-        for epoch in range(self.n_epochs):
-            to_print = ''
+        for i in range(self.n_epochs):
+            to_print = f'Batch {i:04}: '
             for phase in self.phases:
                 self.config.model.train() if phase == 'train' else self.config.model.eval()
                 data = next(iter(self.config.fetchers[phase]))
