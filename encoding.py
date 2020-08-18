@@ -9,19 +9,23 @@ root_dir = './UrbanSound8K/audio/'
 metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
 df = pd.read_csv(metadata_file)
 
-files = []
-srs = []
+n_files = 100
+
 for f in df['fold'].unique():
     print(f'Fold: {f}')
+    files = []
+    srs = []
     for idx, row in df[df['fold'] == f].iterrows():
         file_name = os.path.join(os.path.abspath(root_dir), 'fold' + str(row['fold']) + '/', row['slice_file_name'])
         audio, sr = sf.read(file_name)
         files.append(audio)
         srs.append(sr)
-
-    emb_list, ts_list = openl3.get_audio_embedding(files, srs, content_type="env", batch_size=256)
-    encode_dataset = torch.tensor([])
-    for e in emb_list:
-        encoding = torch.tensor(e.mean(axis=0))
-        encode_dataset = torch.cat((encode_dataset, encoding))
-    torch.save(encode_dataset, f'emb_{f}.pt')
+        if (idx + 1) % n_files == 0:
+            emb_list, ts_list = openl3.get_audio_embedding(files, srs, content_type="env", batch_size=256)
+            encode_dataset = torch.tensor([])
+            for e in emb_list:
+                encoding = torch.tensor(e.mean(axis=0))
+                encode_dataset = torch.cat((encode_dataset, encoding))
+            torch.save(encode_dataset, f'emb_{f}_{idx}.pt')
+            files = []
+            srs = []
