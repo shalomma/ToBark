@@ -19,26 +19,23 @@ class Trainer:
 
     def train(self):
         for epoch in range(self.n_epochs):
+            to_print = ''
             for phase in self.phases:
                 running_loss = 0.0
-                if phase == 'train':
-                    self.config.model.train()
-                else:
-                    self.config.model.eval()
+                self.config.model.train() if phase == 'train' else self.config.model.eval()
+                # for data in self.config.fetchers[phase]:
+                data = next(iter(self.config.fetchers[phase]))
+                inputs, labels = data['wave'], data['class']
+                self.config.optimizer.zero_grad()
 
-                for data in self.config.fetchers[phase]:
-                    inputs, labels = data['wave'], data['class']
-                    self.config.optimizer.zero_grad()
+                with torch.set_grad_enabled(phase == 'train'):
+                    outputs = self.config.model(inputs)
 
-                    with torch.set_grad_enabled(phase == 'train'):
-                        outputs = self.config.model(inputs)
+                    loss = self.config.criterion(outputs, labels)
+                    if phase == 'train':
+                        loss.backward()
+                        self.config.optimizer.step()
 
-                        loss = self.config.criterion(outputs, labels)
-                        if phase == 'train':
-                            loss.backward()
-                            self.config.optimizer.step()
-
-                    running_loss += loss.item()
-                    print(f'{phase}: {running_loss:.4f}')
-
-                # loss = running_loss / len(self.config.fetchers[phase])
+                running_loss += loss.item()
+                to_print += f'{phase}: {running_loss:.4f}\t'
+            print(to_print)
