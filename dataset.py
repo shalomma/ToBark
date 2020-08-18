@@ -6,12 +6,12 @@ import torch.utils.data as data
 
 
 class UrbanSound8K(data.Dataset):
-    def __init__(self, metadata_file, root_dir, transform=None):
-        self.metadata = pd.read_csv(metadata_file)
+    def __init__(self, metadata_file, root_dir, phase='train', transform=None):
+        df = pd.read_csv(metadata_file)
+        self.metadata = df[df['fold'] == 1] if phase == 'train' else df[df['fold'] == 10]
         self.y = torch.tensor(self.metadata['classID'])
         self.root_dir = root_dir
         self.transform = transform
-        self.max_frames = 176400
 
     def __len__(self):
         return len(self.metadata)
@@ -25,17 +25,6 @@ class UrbanSound8K(data.Dataset):
                                  row['slice_file_name'])
         wave, sample_rate = torchaudio.load(file_name)
         wave = wave[0]
-        length = len(wave)
-        if length % 2 == 1:
-            wave = wave[:-1]
-        if length > self.max_frames:
-            mid_idx = length // 2
-            wave = wave[mid_idx - self.max_frames // 2:mid_idx + self.max_frames // 2]
-        elif length < self.max_frames:
-            mid_idx = self.max_frames // 2
-            t = torch.zeros(self.max_frames)
-            t[mid_idx - length // 2:mid_idx + length // 2] = t[mid_idx - length // 2:mid_idx + length // 2] + wave
-            wave = t
 
         if self.transform:
             wave = self.transform(wave)
