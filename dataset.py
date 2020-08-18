@@ -23,11 +23,12 @@ class UrbanSound8K(data.Dataset):
         row = self.metadata.iloc[idx]
         file_name = os.path.join(os.path.abspath(self.root_dir), 'fold' + str(row['fold']) + '/',
                                  row['slice_file_name'])
-        wave, sample_rate = torchaudio.backend.sox_backend.load(file_name)
-        wave = wave[0]
+        sample = torchaudio.backend.sox_backend.load(file_name)
 
         if self.transform:
-            wave = self.transform(wave)
+            sample = self.transform(sample)
+
+        wave, sample_rate = sample
 
         return {
             'wave': wave,
@@ -39,4 +40,4 @@ if __name__ == '__main__':
     path = 'UrbanSound8K/metadata/UrbanSound8K.csv'
     root = 'UrbanSound8K/audio'
     data = UrbanSound8K(path, root)
-    sample = next(iter(data))
+    sample_ = next(iter(data))

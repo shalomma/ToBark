@@ -1,12 +1,11 @@
 import torch
 from torch.optim import Adam
-import torchaudio
+from torchvision.transforms import Compose
 
 import loader
 from trainer import Trainer, TrainConfig
 from network import WaveCNN
-from torchvision.transforms import Compose
-from transforms import CutAndPaste
+import transforms
 
 
 if __name__ == '__main__':
@@ -28,8 +27,8 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
     compose = Compose([
-        CutAndPaste(max_frames),
-        torchaudio.transforms.Spectrogram()
+        transforms.CutAndPaste(max_frames),
+        transforms.Spectrogram()
     ])
     loaders = loader.UrbanSound8KLoader(compose).get(batch_size)
 

@@ -1,11 +1,14 @@
 from torch import zeros
+import torchaudio
 
 
 class CutAndPaste:
     def __init__(self, max_frames):
         self.max_frames = max_frames
 
-    def __call__(self, wave):
+    def __call__(self, sample):
+        wave, sample_rate = sample
+        wave = wave[0]
         length = len(wave)
         if length % 2 == 1:
             wave = wave[:-1]
@@ -17,4 +20,14 @@ class CutAndPaste:
             t = zeros(self.max_frames)
             t[mid_idx - length // 2:mid_idx + length // 2] = t[mid_idx - length // 2:mid_idx + length // 2] + wave
             wave = t
-        return wave
+        return wave, sample_rate
+
+
+class Spectrogram:
+    def __init__(self):
+        self.func = torchaudio.transforms.Spectrogram()
+
+    def __call__(self, sample):
+        wave, sample_rate = sample
+        wave = self.func(wave)
+        return wave, sample_rate
