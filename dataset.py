@@ -6,15 +6,7 @@ import torch.utils.data as data
 
 
 class UrbanSound8K(data.Dataset):
-    """UrbanSound8K dataset"""
-
     def __init__(self, metadata_file, root_dir, transform=None):
-        """
-        Args:
-            metadata_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with the audio files.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
         self.metadata = pd.read_csv(metadata_file)
         self.y = torch.tensor(self.metadata['classID'])
         self.root_dir = root_dir
@@ -32,11 +24,18 @@ class UrbanSound8K(data.Dataset):
         file_name = os.path.join(os.path.abspath(self.root_dir), 'fold' + str(row['fold']) + '/',
                                  row['slice_file_name'])
         wave, sample_rate = torchaudio.load(file_name)
-        wave = wave[0][:self.max_frames]
-        length = wave.shape[0]
-        t = torch.zeros(self.max_frames)
-        t[:length] = t[:length] + wave
-        wave = t
+        wave = wave[0]
+        length = len(wave)
+        if length % 2 == 1:
+            wave = wave[:-1]
+        if length > self.max_frames:
+            mid_idx = length // 2
+            wave = wave[mid_idx - self.max_frames // 2:mid_idx + self.max_frames // 2]
+        elif length < self.max_frames:
+            mid_idx = self.max_frames // 2
+            t = torch.zeros(self.max_frames)
+            t[mid_idx - length // 2:mid_idx + length // 2] = t[mid_idx - length // 2:mid_idx + length // 2] + wave
+            wave = t
 
         if self.transform:
             wave = self.transform(wave)
