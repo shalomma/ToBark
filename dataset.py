@@ -39,7 +39,7 @@ class UrbanSound8K(data.Dataset):
 
 class UrbanEmbedded(data.Dataset):
     def __init__(self, root_dir, train=True):
-        self.data = torch.load(os.path.join(root_dir, 'data.pt'))
+        self.data = torch.load(os.path.join(root_dir, 'data.pt'))[:, :6, :]
         self.y = torch.load(os.path.join(root_dir, 'labels.pt'))
         val_size = 500
         slc = slice(None, len(self.y) - val_size) if train else slice(-val_size, None)
