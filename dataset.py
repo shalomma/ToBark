@@ -3,7 +3,6 @@ import pandas as pd
 import torchaudio
 import torch
 import torch.utils.data as data
-import numpy as np
 
 
 class UrbanSound8K(data.Dataset):
@@ -39,12 +38,9 @@ class UrbanSound8K(data.Dataset):
 
 
 class UrbanEmbedded(data.Dataset):
-    def __init__(self, root_dir, train=True):
+    def __init__(self, root_dir, indices):
         self.data = torch.load(os.path.join(root_dir, 'data.pt'))[:, :6, :]
         self.y = torch.load(os.path.join(root_dir, 'labels.pt'))
-        val_size = 5000 if train else 300
-        current_indices = np.arange(0, len(self.y))
-        indices = np.random.choice(current_indices, val_size, replace=False)
         self.data = self.data[indices]
         self.y = self.y[indices]
 

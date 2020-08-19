@@ -1,6 +1,7 @@
 from torch import manual_seed
 from torch.utils.data import DataLoader
 import dataset
+import numpy as np
 
 
 class Loader:
@@ -30,5 +31,10 @@ class UrbanEmbeddedLoader(Loader):
     def __init__(self):
         super(UrbanEmbeddedLoader, self).__init__()
         root_dir = './UrbanSound8K/'
-        self.data['train'] = dataset.UrbanEmbedded(root_dir, train=True)
-        self.data['val'] = dataset.UrbanEmbedded(root_dir, train=False)
+        size = 8732
+        val_size = 732
+        data_indices = np.arange(0, size)
+        val_indices = np.random.choice(data_indices, val_size, replace=False)
+        train_indices = np.array(list(set(data_indices) - set(val_indices)))
+        self.data['train'] = dataset.UrbanEmbedded(root_dir, train_indices)
+        self.data['val'] = dataset.UrbanEmbedded(root_dir, val_indices)
