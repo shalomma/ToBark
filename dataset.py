@@ -6,10 +6,10 @@ import torch.utils.data as data
 
 
 class UrbanSound8K(data.Dataset):
-    def __init__(self, metadata_file, root_dir, phase='train', transform=None):
+    def __init__(self, metadata_file, root_dir, train=True, transform=None):
         df = pd.read_csv(metadata_file)
         mask_val = df['fold'] == 10
-        self.metadata = df[~mask_val] if phase == 'train' else df[mask_val]
+        self.metadata = df[~mask_val] if train else df[mask_val]
         self.y = torch.tensor(self.metadata['classID'].values)
         self.root_dir = root_dir
         self.transform = transform
@@ -37,8 +37,30 @@ class UrbanSound8K(data.Dataset):
         }
 
 
+class UrbanTensor(data.Dataset):
+    def __init__(self, root_dir, train=True):
+        self.data = torch.load(os.path.join(root_dir, 'data.pt'))
+        self.y = torch.load(os.path.join(root_dir, 'labels.pt'))
+        val_size = 500
+        slc = slice(None, len(self.y) - val_size) if train else slice(-val_size, None)
+        self.data = self.data[slc]
+        self.y = self.y[slc]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        return {
+            'wave': self.data[idx],
+            'class': self.y[idx]
+        }
+
+
 if __name__ == '__main__':
-    path = 'UrbanSound8K/metadata/UrbanSound8K.csv'
-    root = 'UrbanSound8K/audio'
-    data = UrbanSound8K(path, root)
+    path_ = 'UrbanSound8K/metadata/UrbanSound8K.csv'
+    root_ = 'UrbanSound8K'
+    data = UrbanSound8K(path_, root_)
     sample_ = next(iter(data))

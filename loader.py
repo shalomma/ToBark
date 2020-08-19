@@ -22,5 +22,13 @@ class UrbanSound8KLoader(Loader):
         super(UrbanSound8KLoader, self).__init__()
         root_dir = './UrbanSound8K/audio/'
         metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
-        self.data['train'] = dataset.UrbanSound8K(metadata_file, root_dir, phase='train', transform=compose)
-        self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, phase='val', transform=compose)
+        self.data['train'] = dataset.UrbanSound8K(metadata_file, root_dir, train=True, transform=compose)
+        self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, train=False, transform=compose)
+
+
+class UrbanTensorLoader(Loader):
+    def __init__(self):
+        super(UrbanTensorLoader, self).__init__()
+        root_dir = './UrbanSound8K/'
+        self.data['train'] = dataset.UrbanTensor(root_dir, train=True)
+        self.data['val'] = dataset.UrbanTensor(root_dir, train=False)
