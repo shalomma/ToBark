@@ -36,8 +36,7 @@ for f in sorted(df['fold'].unique()):
                 min_ = torch.tensor(e.min(axis=0))
                 skew_ = torch.tensor(stats.skew(e, axis=0))
                 kurtosis_ = torch.tensor(stats.kurtosis(e, axis=0))
-                entropy_ = torch.tensor(stats.entropy(e, axis=0))
-                encoding = torch.stack([mean_, median_, max_, min_, skew_, kurtosis_, entropy_]).view(1, 7, 512)
+                encoding = torch.stack([mean_, median_, max_, min_, skew_, kurtosis_]).view(1, 7, 512)
                 if i == 0:
                     encode_dataset = encoding
                 else:
