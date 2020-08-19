@@ -46,4 +46,5 @@ for f in sorted(df['fold'].unique()):
             torch.save(encode_dataset, f'emb_{f}_{idx}.pt')
             torch.save(torch.tensor(labels), f'lbl_{f}_{idx}.pt')
             files = []
+            labels = []
             srs = []
