@@ -26,9 +26,9 @@ class UrbanSound8KLoader(Loader):
         self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, train=False, transform=compose)
 
 
-class UrbanTensorLoader(Loader):
+class UrbanEmbeddedLoader(Loader):
     def __init__(self):
-        super(UrbanTensorLoader, self).__init__()
+        super(UrbanEmbeddedLoader, self).__init__()
         root_dir = './UrbanSound8K/'
         self.data['train'] = dataset.UrbanEmbedded(root_dir, train=True)
         self.data['val'] = dataset.UrbanEmbedded(root_dir, train=False)
