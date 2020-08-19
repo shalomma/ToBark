@@ -7,11 +7,11 @@ class Residual(nn.Module):
         super(Residual, self).__init__()
         self._block = nn.Sequential(
             nn.ReLU(True),
-            nn.Conv2d(in_channels=in_channels,
+            nn.Conv1d(in_channels=in_channels,
                       out_channels=num_residual_hidden,
                       kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(True),
-            nn.Conv2d(in_channels=num_residual_hidden,
+            nn.Conv1d(in_channels=num_residual_hidden,
                       out_channels=num_hidden,
                       kernel_size=1, stride=1, bias=False)
         )
@@ -89,6 +89,54 @@ class WaveCNN(nn.Module):
 
         x = self._conv_5(x)
         x = self._residual_stack(x)
+        x = x.view(batch, -1)
+        x = self.fc(x)
+        return x
+
+
+class EmbeddedWaveCNN(nn.Module):
+    def __init__(self, in_channels, num_residual_layers):
+        super(EmbeddedWaveCNN, self).__init__()
+
+        self._conv_1 = nn.Conv1d(in_channels=in_channels,
+                                 out_channels=4,
+                                 kernel_size=15,
+                                 stride=2, padding=0, dilation=2)
+        self._pool_1 = nn.MaxPool1d(kernel_size=7, stride=1, padding=0)
+        self._conv_2 = nn.Conv1d(in_channels=4,
+                                 out_channels=2,
+                                 kernel_size=15,
+                                 stride=2, padding=0, dilation=2)
+        self._pool_2 = nn.MaxPool1d(kernel_size=3, stride=1, padding=0)
+        self._conv_3 = nn.Conv1d(in_channels=2,
+                                 out_channels=2,
+                                 kernel_size=5,
+                                 stride=2, padding=0, dilation=2)
+        self._pool_3 = nn.MaxPool1d(kernel_size=3, stride=1, padding=0)
+        self._residual_stack = ResidualStack(in_channels=2,
+                                             num_hidden=1,
+                                             num_residual_layers=num_residual_layers,
+                                             num_residual_hidden=1)
+        self._conv_4 = nn.Conv1d(in_channels=2,
+                                 out_channels=1,
+                                 kernel_size=5,
+                                 stride=2, padding=0, dilation=1)
+        self.fc = nn.Linear(21, 10)
+
+    def forward(self, inputs):
+        batch, _, _ = inputs.shape
+        x = inputs
+        x = self._conv_1(x)
+        x = F.relu(x)
+        x = self._pool_1(x)
+        x = self._conv_2(x)
+        x = F.relu(x)
+        x = self._pool_2(x)
+        x = self._conv_3(x)
+        x = F.relu(x)
+        x = self._pool_3(x)
+        x = self._residual_stack(x)
+        x = self._conv_4(x)
         x = x.view(batch, -1)
         x = self.fc(x)
         return x
