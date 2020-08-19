@@ -37,7 +37,7 @@ class UrbanSound8K(data.Dataset):
         }
 
 
-class UrbanTensor(data.Dataset):
+class UrbanEmbedded(data.Dataset):
     def __init__(self, root_dir, train=True):
         self.data = torch.load(os.path.join(root_dir, 'data.pt'))
         self.y = torch.load(os.path.join(root_dir, 'labels.pt'))
