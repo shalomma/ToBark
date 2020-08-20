@@ -35,7 +35,7 @@ def parser():
 data, labels = parser()
 
 torch.save(torch.tensor(data), 'mel_data.pt')
-torch.save(torch.tensor(data), 'mel_labels.pt')
+torch.save(torch.tensor(labels), 'mel_labels.pt')
 
 X = data.reshape((-1, 16, 8, 1))
 Y = to_categorical(labels)
