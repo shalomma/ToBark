@@ -156,8 +156,13 @@ class MelCNN2d(nn.Module):
                                  kernel_size=3,
                                  stride=1, padding=1)
         self._pool_2 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
+        self._conv_3 = nn.Conv2d(in_channels=128,
+                                 out_channels=64,
+                                 kernel_size=3,
+                                 stride=1, padding=1)
+        self._pool_3 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
         self.dropout = nn.Dropout(0.1)
-        self.fc1 = nn.Linear(10752, 1024)
+        self.fc1 = nn.Linear(4160, 1024)
         self.fc2 = nn.Linear(1024, 10)
 
     def forward(self, inputs):
@@ -169,6 +174,9 @@ class MelCNN2d(nn.Module):
         x = torch.tanh(x)
         x = self._pool_2(x)
         x = self.dropout(x)
+        x = self._conv_3(x)
+        x = torch.tanh(x)
+        x = self._pool_3(x)
         x = x.view(batch, -1)
         x = self.fc1(x)
         x = torch.tanh(x)
