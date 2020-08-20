@@ -29,17 +29,16 @@ def parser():
         mels = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T, axis=0)
         feature.append(mels)
         label.append(df["classID"][i])
-    return [feature, label]
+    return np.array(feature), np.array(label)
 
 
-temp = parser()
-temp = np.array(temp)
-data = temp.transpose()
+data, labels = parser()
 
 torch.save(torch.tensor(data), 'mel_data.pt')
+torch.save(torch.tensor(data), 'mel_labels.pt')
 
-X_ = data[:, 0]
-Y = data[:, 1]
+X_ = data
+Y = labels
 print(X_.shape, Y.shape)
 X = np.empty([N, 128])
 for i in range(N):
