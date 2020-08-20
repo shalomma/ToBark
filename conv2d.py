@@ -21,7 +21,7 @@ label = []
 def parser():
     # Function to load files and extract features
     for i in range(N):
-        file_name = 'UrbanSound8K/metadata/audio/fold' + str(df["fold"][i]) + '/' + df["slice_file_name"][i]
+        file_name = 'UrbanSound8K/audio/fold' + str(df["fold"][i]) + '/' + df["slice_file_name"][i]
         # Here kaiser_fast is a technique used for faster extraction
         X, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
         # We extract mfcc feature from data
