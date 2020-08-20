@@ -37,18 +37,12 @@ data, labels = parser()
 torch.save(torch.tensor(data), 'mel_data.pt')
 torch.save(torch.tensor(data), 'mel_labels.pt')
 
-X_ = data
-Y = labels
-print(X_.shape, Y.shape)
-X = np.empty([N, 128])
-for i in range(N):
-    X[i] = (X_[i])
-Y = to_categorical(Y)
+X = data.reshape((-1, 16, 8, 1))
+Y = to_categorical(labels)
 print(X.shape)
 print(Y.shape)
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=1)
-X_train = X_train.reshape(-1, 16, 8, 1)
-X_test = X_test.reshape(-1, 16, 8, 1)
+
 
 input_dim = (16, 8, 1)
 
