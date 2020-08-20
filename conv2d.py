@@ -12,18 +12,20 @@ import librosa.display
 df = pd.read_csv("../UrbanSound8K/UrbanSound8K.csv")
 print(df.head())
 
+N = 8732
+
 feature = []
 label = []
 
 
 def parser():
     # Function to load files and extract features
-    for i in range(8732):
+    for i in range(N):
         file_name = 'UrbanSound8K/fold' + str(df["fold"][i]) + '/' + df["slice_file_name"][i]
         # Here kaiser_fast is a technique used for faster extraction
         X, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
         # We extract mfcc feature from data
-        mels = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T,axis=0)
+        mels = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T, axis=0)
         feature.append(mels)
         label.append(df["classID"][i])
     return [feature, label]
@@ -36,15 +38,15 @@ data = temp.transpose()
 X_ = data[:, 0]
 Y = data[:, 1]
 print(X_.shape, Y.shape)
-X = np.empty([8732, 128])
-for i in range(8732):
+X = np.empty([N, 128])
+for i in range(N):
     X[i] = (X_[i])
 Y = to_categorical(Y)
 print(X.shape)
 print(Y.shape)
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, random_state=1)
-X_train = X_train.reshape(6549, 16, 8, 1)
-X_test = X_test.reshape(2183, 16, 8, 1)
+X_train = X_train.reshape(-1, 16, 8, 1)
+X_test = X_test.reshape(-1, 16, 8, 1)
 
 input_dim = (16, 8, 1)
 
