@@ -1,3 +1,4 @@
+import torch
 import pandas as pd
 import numpy as np
 
@@ -35,6 +36,8 @@ temp = parser()
 temp = np.array(temp)
 data = temp.transpose()
 
+torch.save(torch.tensor(data), 'mel_data.pt')
+
 X_ = data[:, 0]
 Y = data[:, 1]
 print(X_.shape, Y.shape)
@@ -59,15 +62,7 @@ model.add(Dropout(0.1))
 model.add(Flatten())
 model.add(Dense(1024, activation="tanh"))
 model.add(Dense(10, activation="softmax"))
+print(model.summary())
 
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 model.fit(X_train, Y_train, epochs=90, batch_size=50, validation_data=(X_test, Y_test))
-print(model.summary())
-
-predictions = model.predict(X_test)
-score = model.evaluate(X_test, Y_test)
-print(score)
-
-preds = np.argmax(predictions, axis=1)
-result = pd.DataFrame(preds)
-result.to_csv("UrbanSound8kResults.csv")
