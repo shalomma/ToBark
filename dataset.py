@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-import torchaudio
+import numpy as np
+import librosa
 import torch
 import torch.utils.data as data
 
@@ -24,15 +25,12 @@ class UrbanSound8K(data.Dataset):
         row = self.metadata.iloc[idx]
         file_name = os.path.join(os.path.abspath(self.root_dir), 'fold' + str(row['fold']) + '/',
                                  row['slice_file_name'])
-        sample = torchaudio.backend.sox_backend.load(file_name)
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        wave, sample_rate = sample
+        x, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
+        mels = np.mean(librosa.feature.melspectrogram(y=x, sr=sample_rate).T, axis=0)
+        mels = torch.tensor(mels).view(1, 16, 8)
 
         return {
-            'wave': wave,
+            'wave': mels,
             'class': self.y[idx]
         }
 

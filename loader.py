@@ -19,12 +19,12 @@ class Loader:
 
 
 class UrbanSound8KLoader(Loader):
-    def __init__(self, compose):
+    def __init__(self):
         super(UrbanSound8KLoader, self).__init__()
         root_dir = './UrbanSound8K/audio/'
         metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
-        self.data['train'] = dataset.UrbanSound8K(metadata_file, root_dir, train=True, transform=compose)
-        self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, train=False, transform=compose)
+        self.data['train'] = dataset.UrbanSound8K(metadata_file, root_dir, train=True)
+        self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, train=False)
 
 
 class UrbanMelSpectrogramLoader(Loader):

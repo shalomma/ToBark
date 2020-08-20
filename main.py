@@ -30,7 +30,7 @@ if __name__ == '__main__':
         transforms.CutAndPaste(max_frames),
         transforms.Spectrogram()
     ])
-    loaders = loader.UrbanMelSpectrogramLoader().get(batch_size)
+    loaders = loader.UrbanSound8KLoader().get(batch_size)
 
     config = TrainConfig(model, loaders, criterion, optimizer)
     trainer = Trainer(config)
