@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -140,3 +141,37 @@ class EmbeddedWaveCNN(nn.Module):
         x = x.view(batch, -1)
         x = self.fc(x)
         return x
+
+
+class MelCNN2d(nn.Module):
+    def __init__(self, in_channels):
+        super(MelCNN2d, self).__init__()
+        self._conv_1 = nn.Conv2d(in_channels=in_channels,
+                                 out_channels=64,
+                                 kernel_size=3,
+                                 stride=1, padding=1)
+        self._pool_1 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
+        self._conv_2 = nn.Conv2d(in_channels=64,
+                                 out_channels=128,
+                                 kernel_size=3,
+                                 stride=1, padding=1)
+        self._pool_2 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
+        self.dropout = nn.Dropout(0.1)
+        self.fc1 = nn.Linear(10752, 1024)
+        self.fc2 = nn.Linear(1024, 10)
+
+    def forward(self, inputs):
+        batch, _, _, _ = inputs.shape
+        x = self._conv_1(inputs)
+        x = torch.tanh(x)
+        x = self._pool_1(x)
+        x = self._conv_2(x)
+        x = torch.tanh(x)
+        x = self._pool_2(x)
+        x = self.dropout(x)
+        x = x.view(batch, -1)
+        x = self.fc1(x)
+        x = torch.tanh(x)
+        x = self.fc2(x)
+        return x
+
