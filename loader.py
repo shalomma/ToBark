@@ -27,14 +27,14 @@ class UrbanSound8KLoader(Loader):
         self.data['val'] = dataset.UrbanSound8K(metadata_file, root_dir, train=False, transform=compose)
 
 
-class UrbanEmbeddedLoader(Loader):
+class UrbanMelSpectrogramLoader(Loader):
     def __init__(self):
-        super(UrbanEmbeddedLoader, self).__init__()
+        super(UrbanMelSpectrogramLoader, self).__init__()
         root_dir = './UrbanSound8K/'
         size = 8732
-        val_size = 732
+        val_size = 800
         data_indices = np.arange(0, size)
         val_indices = np.random.choice(data_indices, val_size, replace=False)
         train_indices = np.array(list(set(data_indices) - set(val_indices)))
-        self.data['train'] = dataset.UrbanEmbedded(root_dir, train_indices)
-        self.data['val'] = dataset.UrbanEmbedded(root_dir, val_indices)
+        self.data['train'] = dataset.UrbanMelSpectrogram(root_dir, train_indices)
+        self.data['val'] = dataset.UrbanMelSpectrogram(root_dir, val_indices)

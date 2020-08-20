@@ -57,6 +57,29 @@ class UrbanEmbedded(data.Dataset):
         }
 
 
+class UrbanMelSpectrogram(data.Dataset):
+    def __init__(self, root_dir, indices):
+        self.data = torch.load(os.path.join(root_dir, 'mel_data.pt')).view(-1, 1, 16, 8)
+        # self.y = torch.load(os.path.join(root_dir, 'mel_labels.pt')) ## TODO: create new mel_labels.py
+        metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
+        df = pd.read_csv(metadata_file)
+        self.y = torch.tensor(df['classID'].values)
+        self.data = self.data[indices]
+        self.y = self.y[indices]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        return {
+            'wave': self.data[idx],
+            'class': self.y[idx]
+        }
+
+
 if __name__ == '__main__':
     path_ = 'UrbanSound8K/metadata/UrbanSound8K.csv'
     root_ = 'UrbanSound8K'
