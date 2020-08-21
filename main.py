@@ -1,6 +1,7 @@
 import torch
 from torch.optim import Adam
 from torchvision.transforms import Compose
+from torchsummary import summary
 
 import loader
 from trainer import Trainer, TrainConfig
@@ -23,6 +24,7 @@ if __name__ == '__main__':
     print(device)
 
     model = network.MelCNN2d(in_channels)
+    summary(model, input_size=(in_channels, 16, 8))
     optimizer = Adam(params=model.parameters(), lr=learning_rate)
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
