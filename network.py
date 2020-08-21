@@ -163,7 +163,7 @@ class MelCNN2d(nn.Module):
         self._pool_3 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
         self.dropout = nn.Dropout(0.1)
         self.fc1 = nn.Linear(4160, 1024)
-        self.fc2 = nn.Linear(1024, 10)
+        self.fc2 = nn.Linear(1024, 1)
 
     def forward(self, inputs):
         batch, _, _, _ = inputs.shape

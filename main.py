@@ -26,7 +26,7 @@ if __name__ == '__main__':
     model = network.MelCNN2d(in_channels)
     summary(model, input_size=(in_channels, 16, 8))
     optimizer = Adam(params=model.parameters(), lr=learning_rate)
-    criterion = torch.nn.CrossEntropyLoss(reduction='mean')
+    criterion = torch.nn.BCEWITHLOGITSLOSS(reduction='mean')
 
     compose = Compose([
         transforms.CutAndPaste(max_frames),

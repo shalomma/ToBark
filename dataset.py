@@ -61,6 +61,9 @@ class UrbanMelSpectrogram(data.Dataset):
         # self.y = torch.load(os.path.join(root_dir, 'mel_labels.pt')) ## TODO: create new mel_labels.py
         metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
         df = pd.read_csv(metadata_file)
+        mask_dog = df['classID'] == 3
+        df.loc[mask_dog, 'classID'] = 1
+        df.loc[~mask_dog, 'classID'] = 0
         self.y = torch.tensor(df['classID'].values)
         self.data = self.data[indices]
         self.y = self.y[indices]
