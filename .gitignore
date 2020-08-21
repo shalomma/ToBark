@@ -4,6 +4,7 @@ venv/
 .ipynb_checkpoints/
 UrbanSound8K/
 __pycache__/
+.DS_Store
 *.tar
 *.ipynb
 *.h5
