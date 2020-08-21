@@ -20,11 +20,11 @@ class Trainer:
 
     def train(self):
         for i in range(self.n_epochs):
-            to_print = f'Batch {i:04}: '
+            to_print = f'Batch {i:04}  '
             for phase in self.phases:
                 self.config.model.train() if phase == 'train' else self.config.model.eval()
                 data = next(iter(self.config.fetchers[phase]))
-                inputs, labels = data['wave'], data['class'].float()
+                inputs, labels = data['wave'].to(self.device), data['class'].float().to(self.device)
                 self.config.optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'train'):
@@ -36,12 +36,11 @@ class Trainer:
                         self.config.optimizer.step()
 
                 labels = labels.detach().cpu().numpy()
-                # pred = outputs.argmax(axis=1).detach().cpu().numpy()
                 pred = (outputs > 0.5).detach().cpu().numpy()
                 recall = metrics.recall_score(labels, pred)
                 precision = metrics.precision_score(labels, pred)
                 f1 = metrics.f1_score(labels, pred)
-                # acc = torch.eq(labels, outputs.argmax(axis=1)).numpy().mean()
-                to_print += f'{phase} loss: {loss.item():.4f} recall: {recall:.3f} ' \
+                acc = metrics.accuracy_score(labels, pred)
+                to_print += f'| {phase} loss: {loss.item():.4f} acc: {acc:.3f} recall: {recall:.3f} ' \
                             f'precision: {precision:.3f} f1: {f1:.3f}\t'
             print(to_print)
