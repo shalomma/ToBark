@@ -1,5 +1,7 @@
 import torch
 import loader
+import time
+import datetime
 
 
 class Encoder:
@@ -12,12 +14,16 @@ class Encoder:
     def encode(self):
         features = []
         labels = []
+        start = time.time()
         for phase in ['train', 'val']:
+            print(phase)
             for data in self.loaders[phase]:
                 features.append(data['wave'])
                 labels.append(data['class'])
         self.features = torch.cat(features)
         self.labels = torch.cat(labels)
+        end = time.time() - start
+        print(f'Pipeline runtime: {datetime.timedelta(seconds=int(end))}')
 
     def dump(self):
         with open(f'{self.dataset_name}_features.pt', 'wb') as f:
