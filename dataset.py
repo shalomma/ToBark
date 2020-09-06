@@ -97,8 +97,3 @@ class MelSpecEncoded:
             'wave': self.data[idx],
             'class': self.y[idx]
         }
-
-
-if __name__ == '__main__':
-    data = CatsAndDogs()
-    sample_ = next(iter(data))
