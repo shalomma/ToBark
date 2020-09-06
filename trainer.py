@@ -3,6 +3,7 @@ import torch
 import pickle
 import inspect
 from datetime import datetime
+from git import Repo
 
 
 class TrainConfig:
@@ -53,6 +54,7 @@ class TrainCache:
         os.makedirs(self.directory)
 
     def save(self, model, params):
+        params['commit'] = Repo('./').head.commit.hexsha[:7]
         with open(f'{self.directory}/params.pkl', 'wb') as f:
             pickle.dump(params, f)
         with open(f'{self.directory}/model.pt', 'wb') as f:
