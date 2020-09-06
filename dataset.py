@@ -4,6 +4,7 @@ import numpy as np
 import librosa
 import torch
 import torch.utils.data as data
+import glob
 
 
 class UrbanSound8K(data.Dataset):
@@ -74,6 +75,36 @@ class UrbanMelSpectrogram(UrbanSound8K):
         self.y = self.y[indices]
 
 
+class CatsAndDogs(data.Dataset):
+    def __init__(self):
+        self.root_dir = './data/cats_dogs/'
+        self.files = glob.glob(self.root_dir + '*')
+        self.y = [self.parse_class(f) for f in self.files]
+
+    @staticmethod
+    def parse_class(file):
+        return 3 if 'dog' in file.split('/')[-1] else 10
+
+    def __len__(self):
+        return len(self.files)
+
+    def __str__(self):
+        return str(self.__class__.__name__)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        x, sample_rate = librosa.load(self.files[idx], res_type='kaiser_fast')
+        mel = np.mean(librosa.feature.melspectrogram(y=x, sr=sample_rate).T, axis=0)
+        mel = torch.tensor(mel).view(1, 16, 8)
+
+        return {
+            'wave': mel,
+            'class': self.y[idx]
+        }
+
+
 if __name__ == '__main__':
-    data = UrbanSound8K()
+    data = CatsAndDogs()
     sample_ = next(iter(data))
