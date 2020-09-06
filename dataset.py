@@ -64,8 +64,8 @@ class CatsAndDogs(Dataset):
         self.root_dir = './data/cats_dogs/'
         self.metadata = glob.glob(self.root_dir + '*')
         self.y = [self.parse_class(f) for f in self.metadata]
-        self.metadata = self.metadata[indices]
-        self.y = self.y[indices]
+        self.metadata = list(map(self.metadata.__getitem__, indices))
+        self.y = list(map(self.y.__getitem__, indices))
 
     @staticmethod
     def parse_class(file):
