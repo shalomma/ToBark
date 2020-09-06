@@ -13,3 +13,4 @@ __pycache__/
 *.wav
 *.zip
 *.gz
+*.pkl
