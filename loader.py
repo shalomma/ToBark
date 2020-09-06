@@ -10,6 +10,14 @@ class Loader:
     def __init__(self):
         manual_seed(self.seed)
         self.data = dict()
+        size = 8732
+        val_size = 800
+        data_indices = np.arange(0, size)
+        indices = np.random.choice(data_indices, val_size, replace=False)
+        self.indices = {
+            'train': np.array(list(set(data_indices) - set(indices))),
+            'val': indices
+        }
 
     def __len__(self):
         return len(self.data['train']) + len(self.data['val'])
@@ -27,17 +35,12 @@ class Loader:
 class UrbanSound8KLoader(Loader):
     def __init__(self):
         super(UrbanSound8KLoader, self).__init__()
-        self.data['train'] = dataset.UrbanReduced(train=True)
-        self.data['val'] = dataset.UrbanReduced(train=False)
+        self.data['train'] = dataset.UrbanReduced(self.indices['train'])
+        self.data['val'] = dataset.UrbanReduced(self.indices['val'])
 
 
 class UrbanMelSpectrogramLoader(Loader):
     def __init__(self):
         super(UrbanMelSpectrogramLoader, self).__init__()
-        size = 8732
-        val_size = 800
-        data_indices = np.arange(0, size)
-        val_indices = np.random.choice(data_indices, val_size, replace=False)
-        train_indices = np.array(list(set(data_indices) - set(val_indices)))
-        self.data['train'] = dataset.UrbanMelSpectrogram(train_indices)
-        self.data['val'] = dataset.UrbanMelSpectrogram(val_indices)
+        self.data['train'] = dataset.UrbanMelSpectrogram(self.indices['train'])
+        self.data['val'] = dataset.UrbanMelSpectrogram(self.indices['val'])
