@@ -27,8 +27,10 @@ class Loader:
     def get(self, batch_size):
         loaders = dict()
         loaders['train'] = DataLoader(self.data['train'], batch_size=batch_size, shuffle=True, pin_memory=True)
+        print(f"{self.data['train']} train (size={len(self.data['train'])})")
         if self.indices['val'].size > 0:
             loaders['val'] = DataLoader(self.data['val'], batch_size=batch_size, shuffle=True, pin_memory=True)
+            print(f"{self.data['val']} val (size={len(self.data['val'])})")
         return loaders
 
 

@@ -77,6 +77,7 @@ class CatsAndDogs(Dataset):
 
 class MelSpecEncoded:
     def __init__(self, prefix, indices):
+        self.prefix = prefix
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         root_dir = './data'
         with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
@@ -85,6 +86,9 @@ class MelSpecEncoded:
             self.y = torch.load(f, map_location=device)
         self.data = self.data[indices]
         self.y = self.y[indices]
+
+    def __str__(self):
+        return str(self.__class__.__name__) + ' ' + self.prefix
 
     def __len__(self):
         return len(self.data)
