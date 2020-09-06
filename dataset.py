@@ -59,7 +59,7 @@ class UrbanMelSpectrogram(data.Dataset):
     def __init__(self, root_dir, indices):
         self.data = torch.load(os.path.join(root_dir, 'mel_data.pt')).view(-1, 1, 16, 8)
         # self.y = torch.load(os.path.join(root_dir, 'mel_labels.pt')) ## TODO: create new mel_labels.py
-        metadata_file = './UrbanSound8K/metadata/UrbanSound8K.csv'
+        metadata_file = './data/UrbanSound8K/metadata/UrbanSound8K.csv'
         df = pd.read_csv(metadata_file)
         self.y = torch.tensor(df['classID'].values)
         self.data = self.data[indices]
@@ -79,7 +79,7 @@ class UrbanMelSpectrogram(data.Dataset):
 
 
 if __name__ == '__main__':
-    path_ = 'UrbanSound8K/metadata/UrbanSound8K.csv'
-    root_ = 'UrbanSound8K'
+    path_ = './data/UrbanSound8K/metadata/UrbanSound8K.csv'
+    root_ = './data/UrbanSound8K'
     data = UrbanSound8K(path_, root_)
     sample_ = next(iter(data))
