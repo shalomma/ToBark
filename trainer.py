@@ -51,6 +51,7 @@ class TrainCache:
         timestamp = str(datetime.now())[:-7]
         timestamp = timestamp.replace('-', '_').replace(' ', '_').replace(':', '_')
         self.directory = f'models/{timestamp}'
+        print(self.directory)
         os.makedirs(self.directory)
 
     def save(self, model, params):
