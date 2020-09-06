@@ -65,10 +65,11 @@ class UrbanEmbedded(UrbanSound8K):
 class UrbanMelSpectrogram(UrbanSound8K):
     def __init__(self, indices):
         super(UrbanMelSpectrogram, self).__init__()
-        self.data = torch.load(os.path.join(self.root_dir, 'mel_data.pt')).view(-1, 1, 16, 8)
-        # self.y = torch.load(os.path.join(self.root_dir, 'mel_labels.pt')) ## TODO: create new mel_labels.py
-        df = pd.read_csv(self.metadata_file)
-        self.y = torch.tensor(df['classID'].values)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        with open(os.path.join(self.root_dir, 'urbanreduced_features.pt'), 'rb') as f:
+            self.data = torch.load(f, map_location=device)
+        with open(os.path.join(self.root_dir, 'urbanreduced_labels.pt'), 'rb') as f:
+            self.y = torch.load(f, map_location=device)
         self.data = self.data[indices]
         self.y = self.y[indices]
 
