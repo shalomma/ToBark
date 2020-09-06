@@ -7,7 +7,7 @@ import numpy as np
 class Loader:
     seed = 14
 
-    def __init__(self, size, train_ratio=0.9):
+    def __init__(self, size, train_ratio):
         manual_seed(self.seed)
         self.data = dict()
         train_size = int(size * train_ratio)
@@ -27,28 +27,29 @@ class Loader:
     def get(self, batch_size):
         loaders = dict()
         loaders['train'] = DataLoader(self.data['train'], batch_size=batch_size, shuffle=True, pin_memory=True)
-        loaders['val'] = DataLoader(self.data['val'], batch_size=batch_size, shuffle=True, pin_memory=True)
+        if self.indices['val'].size > 0:
+            loaders['val'] = DataLoader(self.data['val'], batch_size=batch_size, shuffle=True, pin_memory=True)
         return loaders
 
 
 class UrbanSound8KLoader(Loader):
-    def __init__(self):
+    def __init__(self, train_ratio=0.9):
         size = dataset.UrbanSound8K.size
-        super(UrbanSound8KLoader, self).__init__(size)
+        super(UrbanSound8KLoader, self).__init__(size, train_ratio)
         self.data['train'] = dataset.UrbanSound8K(self.indices['train'])
         self.data['val'] = dataset.UrbanSound8K(self.indices['val'])
 
 
 class CatAndDogsLoader(Loader):
-    def __init__(self):
+    def __init__(self, train_ratio=0.9):
         size = dataset.CatsAndDogs.size
-        super(CatAndDogsLoader, self).__init__(size)
+        super(CatAndDogsLoader, self).__init__(size, train_ratio)
         self.data['train'] = dataset.CatsAndDogs(self.indices['train'])
         self.data['val'] = dataset.CatsAndDogs(self.indices['val'])
 
 
 class MelSpecEncodedLoader(Loader):
-    def __init__(self, prefix, size):
-        super(MelSpecEncodedLoader, self).__init__(size)
+    def __init__(self, prefix, size, train_ratio=0.9):
+        super(MelSpecEncodedLoader, self).__init__(size, train_ratio)
         self.data['train'] = dataset.MelSpecEncoded(prefix, self.indices['train'])
         self.data['val'] = dataset.MelSpecEncoded(prefix, self.indices['val'])
