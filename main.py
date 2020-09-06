@@ -1,23 +1,13 @@
-import os
 import torch
 from torch.optim import Adam
 from torchsummary import summary
-from datetime import datetime
 
 import loader
-from trainer import Trainer, TrainConfig
+from trainer import Trainer, TrainConfig, TrainCache
 import network
-from utils import save_model
 
 
 if __name__ == '__main__':
-    if not os.path.exists('models'):
-        os.makedirs('models')
-    timestamp = str(datetime.now())[:-7]
-    timestamp = timestamp.replace('-', '_').replace(' ', '_').replace(':', '_')
-    directory = f'models/{timestamp}'
-    os.makedirs(directory)
-
     params = {
         'epochs': 100,
         'batch_size': 2048,
@@ -39,4 +29,4 @@ if __name__ == '__main__':
     trainer = Trainer(config)
     trainer.n_epochs = params['epochs']
     trainer.train()
-    save_model(model, params, directory)
+    TrainCache().save(model, params)

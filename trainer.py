@@ -1,4 +1,8 @@
+import os
 import torch
+import pickle
+import inspect
+from datetime import datetime
 
 
 class TrainConfig:
@@ -37,3 +41,35 @@ class Trainer:
                 acc = torch.eq(labels, outputs.argmax(axis=1)).numpy().mean()
                 to_print += f'{phase} loss: {loss.item():.4f} acc: {acc:.4f}\t'
             print(to_print)
+
+
+class TrainCache:
+    def __init__(self):
+        if not os.path.exists('models'):
+            os.makedirs('models')
+        timestamp = str(datetime.now())[:-7]
+        timestamp = timestamp.replace('-', '_').replace(' ', '_').replace(':', '_')
+        self.directory = f'models/{timestamp}'
+        os.makedirs(self.directory)
+
+    def save(self, model, params):
+        with open(f'{self.directory}/params.pkl', 'wb') as f:
+            pickle.dump(params, f)
+        with open(f'{self.directory}/model.pt', 'wb') as f:
+            torch.save(model.state_dict(), f)
+
+    @classmethod
+    def load(cls, model_class, directory):
+        with open(f'{directory}/params.pkl', 'rb') as f:
+            params = pickle.load(f)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        args = list(inspect.signature(model_class.__init__).parameters.keys())
+        params_class = dict()
+        for a in args[1:]:
+            params_class[a] = params[a]
+        model = model_class(**params_class).to(device)
+        with open(f'{directory}/model.pt', 'rb') as f:
+            state_dict = torch.load(f, map_location=device)
+            model.load_state_dict(state_dict)
+        model.eval()
+        return model, params
