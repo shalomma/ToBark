@@ -30,14 +30,12 @@ class UrbanSound8K(data.Dataset):
 
 
 class UrbanReduced(UrbanSound8K):
-    def __init__(self, train=True, transform=None):
+    def __init__(self, indices):
         super(UrbanReduced, self).__init__()
         df = pd.read_csv(self.metadata_file)
-        mask_val = df['fold'] == 10
-        self.data = df[~mask_val] if train else df[mask_val]
+        self.data = df.iloc[indices]
         self.y = torch.tensor(self.data['classID'].values)
         self.root_dir = os.path.join(self.root_dir, 'audio')
-        self.transform = transform
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
