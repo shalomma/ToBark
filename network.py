@@ -3,9 +3,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+seed = 14
+
+
 class Residual(nn.Module):
     def __init__(self, in_channels, num_hidden, num_residual_hidden):
         super(Residual, self).__init__()
+        torch.manual_seed(seed)
         self._block = nn.Sequential(
             nn.ReLU(True),
             nn.Conv1d(in_channels=in_channels,
@@ -24,6 +28,7 @@ class Residual(nn.Module):
 class ResidualStack(nn.Module):
     def __init__(self, in_channels, num_hidden, num_residual_layers, num_residual_hidden):
         super(ResidualStack, self).__init__()
+        torch.manual_seed(seed)
         self._num_residual_layers = num_residual_layers
         self._layers = nn.ModuleList([Residual(in_channels, num_hidden, num_residual_hidden)
                                       for _ in range(self._num_residual_layers)])
@@ -37,7 +42,7 @@ class ResidualStack(nn.Module):
 class WaveCNN(nn.Module):
     def __init__(self, in_channels, num_residual_layers):
         super(WaveCNN, self).__init__()
-
+        torch.manual_seed(seed)
         self._conv_1 = nn.Conv2d(in_channels=in_channels,
                                  out_channels=1,
                                  kernel_size=3,
@@ -98,7 +103,7 @@ class WaveCNN(nn.Module):
 class EmbeddedWaveCNN(nn.Module):
     def __init__(self, in_channels, num_residual_layers):
         super(EmbeddedWaveCNN, self).__init__()
-
+        torch.manual_seed(seed)
         self._conv_1 = nn.Conv1d(in_channels=in_channels,
                                  out_channels=4,
                                  kernel_size=15,
@@ -146,6 +151,7 @@ class EmbeddedWaveCNN(nn.Module):
 class MelCNN2d(nn.Module):
     def __init__(self, in_channels, n_classes):
         super(MelCNN2d, self).__init__()
+        torch.manual_seed(seed)
         self._conv_1 = nn.Conv2d(in_channels=in_channels,
                                  out_channels=64,
                                  kernel_size=3,
@@ -182,4 +188,3 @@ class MelCNN2d(nn.Module):
         x = torch.tanh(x)
         x = self.fc2(x)
         return x
-

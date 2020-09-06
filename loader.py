@@ -8,6 +8,7 @@ class Loader:
     seed = 14
 
     def __init__(self, size, train_ratio):
+        np.random.seed(self.seed)
         manual_seed(self.seed)
         self.data = dict()
         train_size = int(size * train_ratio)

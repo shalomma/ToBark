@@ -4,6 +4,12 @@ import pickle
 import inspect
 from datetime import datetime
 from git import Repo
+from torch.backends import cudnn
+
+
+cudnn.deterministic = True
+cudnn.benchmark = False
+cudnn.fastest = True
 
 
 class TrainConfig:
