@@ -23,7 +23,7 @@ if __name__ == '__main__':
     optimizer = Adam(params=model.parameters(), lr=learning_rate)
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    loaders = loader.UrbanMelSpectrogramLoader().get(batch_size)
+    loaders = loader.MelSpecEncodedLoader(prefix='urbansound8k', size=8732).get(batch_size)
 
     config = TrainConfig(model, loaders, criterion, optimizer)
     trainer = Trainer(config)

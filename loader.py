@@ -7,16 +7,15 @@ import numpy as np
 class Loader:
     seed = 14
 
-    def __init__(self):
+    def __init__(self, size, train_ratio=0.9):
         manual_seed(self.seed)
         self.data = dict()
-        size = 8732
-        val_size = 800
+        train_size = int(size * train_ratio)
         data_indices = np.arange(0, size)
-        indices = np.random.choice(data_indices, val_size, replace=False)
+        indices = np.random.choice(data_indices, train_size, replace=False)
         self.indices = {
-            'train': np.array(list(set(data_indices) - set(indices))),
-            'val': indices
+            'train': indices,
+            'val': np.array(list(set(data_indices) - set(indices)))
         }
 
     def __len__(self):
@@ -34,13 +33,22 @@ class Loader:
 
 class UrbanSound8KLoader(Loader):
     def __init__(self):
-        super(UrbanSound8KLoader, self).__init__()
-        self.data['train'] = dataset.UrbanReduced(self.indices['train'])
-        self.data['val'] = dataset.UrbanReduced(self.indices['val'])
+        size = dataset.UrbanSound8K.size
+        super(UrbanSound8KLoader, self).__init__(size)
+        self.data['train'] = dataset.UrbanSound8K(self.indices['train'])
+        self.data['val'] = dataset.UrbanSound8K(self.indices['val'])
 
 
-class UrbanMelSpectrogramLoader(Loader):
+class CatAndDogsLoader(Loader):
     def __init__(self):
-        super(UrbanMelSpectrogramLoader, self).__init__()
-        self.data['train'] = dataset.UrbanMelSpectrogram(self.indices['train'])
-        self.data['val'] = dataset.UrbanMelSpectrogram(self.indices['val'])
+        size = dataset.CatsAndDogs.size
+        super(CatAndDogsLoader, self).__init__(size)
+        self.data['train'] = dataset.CatsAndDogs(self.indices['train'])
+        self.data['val'] = dataset.CatsAndDogs(self.indices['val'])
+
+
+class MelSpecEncodedLoader(Loader):
+    def __init__(self, prefix, size):
+        super(MelSpecEncodedLoader, self).__init__(size)
+        self.data['train'] = dataset.MelSpecEncoded(prefix, self.indices['train'])
+        self.data['val'] = dataset.MelSpecEncoded(prefix, self.indices['val'])
