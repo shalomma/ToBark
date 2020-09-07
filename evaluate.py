@@ -22,6 +22,7 @@ if __name__ == '__main__':
     y = y == 3
     y_hat = y_hat == 3
 
+    print('Accuracy: ', metrics.accuracy_score(y, y_hat))
     print('Recall: ', metrics.recall_score(y, y_hat))
     print('Precision: ', metrics.precision_score(y, y_hat))
     print('Kappa: ', metrics.cohen_kappa_score(y, y_hat))
