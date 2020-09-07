@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 import torch.utils.data as data
 from abc import ABC, abstractmethod
-import scipy.stats as stats
 
 
 class Dataset(data.Dataset, ABC):
@@ -78,8 +77,8 @@ class CatsAndDogs(Dataset):
         if indices is not None:
             self.metadata = glob.glob(self.root_dir + '*')
             self.y = [self.parse_class(f) for f in self.metadata]
-            self.metadata = list(map(self.metadata.__getitem__, indices))
-            self.y = list(map(self.y.__getitem__, indices))
+            self.metadata = [self.metadata[i] for i in indices]
+            self.y = [self.y[i] for i in indices]
 
     def __add__(self, other):
         obj = CatsAndDogs()
@@ -96,26 +95,28 @@ class CatsAndDogs(Dataset):
 
 
 class MelSpecEncoded:
-    def __init__(self, prefix, indices=None):
-        self.prefix = prefix
+    def __init__(self, prefixes, indices=None):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         root_dir = './data'
         if indices is not None:
-            with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
-                self.data = torch.load(f, map_location=device)
-            with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
-                self.y = torch.load(f, map_location=device)
+            self.data = torch.tensor([])
+            self.y = torch.tensor([])
+            for prefix in prefixes:
+                with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
+                    self.data = torch.cat((self.data, torch.load(f, map_location=device)))
+                with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
+                    self.y = torch.cat((self.y, torch.load(f, map_location=device)))
             self.data = self.data[indices]
             self.y = self.y[indices]
 
     def __str__(self):
-        return str(self.__class__.__name__) + ' ' + self.prefix
+        return str(self.__class__.__name__)
 
     def __len__(self):
         return len(self.data)
 
     def __add__(self, other):
-        obj = MelSpecEncoded(self.prefix, None)
+        obj = MelSpecEncoded(None)
         obj.data = torch.cat((self.data, other.data))
         obj.y = torch.cat((self.y, other.y))
         return obj

@@ -12,7 +12,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model, params = TrainCache.load(network.MelCNN2d, args.timestamp)
-    loaders = ld.MelSpecEncodedLoader(prefix='CatsAndDogs', size=277).get_all(277)
+    loaders = ld.MelSpecEncodedLoader(prefixes=['UrbanSound8K', 'CatsAndDogs'], size=277).get_all(277)
     data = next(iter(loaders))
     x, y = data['x'], data['y']
 

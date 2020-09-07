@@ -8,6 +8,7 @@ class Loader:
     seed = 14
 
     def __init__(self, size, train_ratio):
+        assert 0 < train_ratio < 1, '0 < r < 1'
         np.random.seed(self.seed)
         manual_seed(self.seed)
         self.data = dict()
@@ -29,9 +30,8 @@ class Loader:
         loaders = dict()
         loaders['train'] = DataLoader(self.data['train'], batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
         print(f"{self.data['train']} train (size={len(self.data['train'])})")
-        if self.indices['val'].size > 0:
-            loaders['val'] = DataLoader(self.data['val'], batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
-            print(f"{self.data['val']} val (size={len(self.data['val'])})")
+        loaders['val'] = DataLoader(self.data['val'], batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
+        print(f"{self.data['val']} val (size={len(self.data['val'])})")
         return loaders
 
     def get_all(self, batch_size, pin_memory=False):
@@ -56,7 +56,7 @@ class CatAndDogsLoader(Loader):
 
 
 class MelSpecEncodedLoader(Loader):
-    def __init__(self, prefix, size, train_ratio=0.9):
+    def __init__(self, prefixes, size, train_ratio=0.9):
         super(MelSpecEncodedLoader, self).__init__(size, train_ratio)
-        self.data['train'] = dataset.MelSpecEncoded(prefix, self.indices['train'])
-        self.data['val'] = dataset.MelSpecEncoded(prefix, self.indices['val'])
+        self.data['train'] = dataset.MelSpecEncoded(prefixes, self.indices['train'])
+        self.data['val'] = dataset.MelSpecEncoded(prefixes, self.indices['val'])

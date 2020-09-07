@@ -9,7 +9,7 @@ import network
 
 if __name__ == '__main__':
     params = {
-        'epochs': 300,
+        'epochs': 150,
         'batch_size': 256,
         'learning_rate': 1e-3,
         'in_channels': 1,
@@ -26,7 +26,7 @@ if __name__ == '__main__':
                                             10 * params['learning_rate'], cycle_momentum=False)
     criterion = torch.nn.CrossEntropyLoss(reduction='sum')
 
-    loaders = ld.MelSpecEncodedLoader(prefix='UrbanSound8K', size=8732).get(params['batch_size'])
+    loaders = ld.MelSpecEncodedLoader(prefixes=['UrbanSound8K', 'CatsAndDogs'], size=8732).get(params['batch_size'])
 
     config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
     trainer = Trainer(config)
