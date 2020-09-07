@@ -34,6 +34,10 @@ class Loader:
             print(f"{self.data['val']} val (size={len(self.data['val'])})")
         return loaders
 
+    def get_all(self, batch_size, pin_memory=False):
+        return DataLoader(self.data['train'] + self.data['val'],
+                          batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
+
 
 class UrbanSound8KLoader(Loader):
     def __init__(self, train_ratio=0.9):

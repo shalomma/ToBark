@@ -21,6 +21,9 @@ class Dataset(data.Dataset, ABC):
     def __len__(self):
         return len(self.metadata)
 
+    def __add__(self, other):
+        return NotImplemented
+
     @abstractmethod
     def next_file_name(self, idx):
         pass
@@ -85,7 +88,7 @@ class CatsAndDogs(Dataset):
 
 
 class MelSpecEncoded:
-    def __init__(self, prefix, indices):
+    def __init__(self, prefix, indices=None):
         self.prefix = prefix
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         root_dir = './data'
@@ -93,14 +96,21 @@ class MelSpecEncoded:
             self.data = torch.load(f, map_location=device)
         with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
             self.y = torch.load(f, map_location=device)
-        self.data = self.data[indices]
-        self.y = self.y[indices]
+        if indices is not None:
+            self.data = self.data[indices]
+            self.y = self.y[indices]
 
     def __str__(self):
         return str(self.__class__.__name__) + ' ' + self.prefix
 
     def __len__(self):
         return len(self.data)
+
+    def __add__(self, other):
+        obj = MelSpecEncoded(self.prefix, None)
+        obj.data = torch.cat((self.data, other.data))
+        obj.y = torch.cat((self.y, other.y))
+        return obj
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
