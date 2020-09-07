@@ -40,41 +40,42 @@ class ResidualStack(nn.Module, ABC):
         return F.relu(x)
 
 
+class ConvPool2d(nn.Module, ABC):
+    def __init__(self, in_channels, out_channels, kernel_size, p):
+        super(ConvPool2d, self).__init__()
+        torch.manual_seed(seed)
+        self._block = nn.Sequential(
+            nn.Conv2d(in_channels=in_channels,
+                      out_channels=out_channels,
+                      kernel_size=kernel_size,
+                      stride=1, padding=1),
+            nn.Tanh(),
+            nn.MaxPool2d(kernel_size=kernel_size, stride=1, padding=0),
+            nn.Dropout(p)
+        )
+
+    def forward(self, x):
+        return self._block(x)
+
+
 class MelCNN2d(nn.Module, ABC):
     def __init__(self, in_channels, n_classes):
         super(MelCNN2d, self).__init__()
         torch.manual_seed(seed)
-        self._conv_1 = nn.Conv2d(in_channels=in_channels,
-                                 out_channels=64,
-                                 kernel_size=3,
-                                 stride=1, padding=1)
-        self._pool_1 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
-        self._conv_2 = nn.Conv2d(in_channels=64,
-                                 out_channels=128,
-                                 kernel_size=3,
-                                 stride=1, padding=1)
-        self._pool_2 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
-        self._conv_3 = nn.Conv2d(in_channels=128,
-                                 out_channels=64,
-                                 kernel_size=3,
-                                 stride=1, padding=1)
-        self._pool_3 = nn.MaxPool2d(kernel_size=2, stride=1, padding=0)
-        self.dropout = nn.Dropout(0.1)
-        self.fc1 = nn.Linear(4160, 1024)
+        channels = [in_channels, 64, 128, 64]
+        self._layers = nn.ModuleList([
+            ConvPool2d(channels[i], channels[i + 1], 3, 0.05)
+            for i in range(len(channels) - 1)
+        ])
+
+        self.fc1 = nn.Linear(1280, 1024)
         self.fc2 = nn.Linear(1024, n_classes)
 
     def forward(self, inputs):
         batch, _, _, _ = inputs.shape
-        x = self._conv_1(inputs)
-        x = torch.tanh(x)
-        x = self._pool_1(x)
-        x = self._conv_2(x)
-        x = torch.tanh(x)
-        x = self._pool_2(x)
-        x = self.dropout(x)
-        x = self._conv_3(x)
-        x = torch.tanh(x)
-        x = self._pool_3(x)
+        x = inputs
+        for layer in self._layers:
+            x = layer(x)
         x = x.view(batch, -1)
         x = self.fc1(x)
         x = torch.tanh(x)
