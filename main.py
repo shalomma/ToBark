@@ -12,7 +12,7 @@ if __name__ == '__main__':
         'epochs': 1200,
         'batch_size': 2048,
         'learning_rate': 1e-3,
-        'in_channels': 4,
+        'in_channels': 2,
         'n_classes': 11
     }
 
