@@ -1,3 +1,4 @@
+from abc import ABC
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,7 +7,7 @@ import torch.nn.functional as F
 seed = 14
 
 
-class Residual(nn.Module):
+class Residual(nn.Module, ABC):
     def __init__(self, in_channels, num_hidden, num_residual_hidden):
         super(Residual, self).__init__()
         torch.manual_seed(seed)
@@ -25,7 +26,7 @@ class Residual(nn.Module):
         return x + self._block(x)
 
 
-class ResidualStack(nn.Module):
+class ResidualStack(nn.Module, ABC):
     def __init__(self, in_channels, num_hidden, num_residual_layers, num_residual_hidden):
         super(ResidualStack, self).__init__()
         torch.manual_seed(seed)
@@ -39,116 +40,7 @@ class ResidualStack(nn.Module):
         return F.relu(x)
 
 
-class WaveCNN(nn.Module):
-    def __init__(self, in_channels, num_residual_layers):
-        super(WaveCNN, self).__init__()
-        torch.manual_seed(seed)
-        self._conv_1 = nn.Conv2d(in_channels=in_channels,
-                                 out_channels=1,
-                                 kernel_size=3,
-                                 stride=2, padding=0)
-        self._pool_1 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
-        self._conv_2 = nn.Conv2d(in_channels=1,
-                                 out_channels=1,
-                                 kernel_size=5,
-                                 stride=2, padding=0)
-        self._pool_2 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
-        self._conv_3 = nn.Conv2d(in_channels=1,
-                                 out_channels=1,
-                                 kernel_size=5,
-                                 stride=2, padding=0)
-        self._pool_3 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
-        self._conv_4 = nn.Conv2d(in_channels=1,
-                                 out_channels=1,
-                                 kernel_size=5,
-                                 stride=2, padding=0)
-        self._pool_4 = nn.MaxPool2d(kernel_size=3, stride=1, padding=0)
-        self._conv_5 = nn.Conv2d(in_channels=1,
-                                 out_channels=1,
-                                 kernel_size=5,
-                                 stride=2, padding=0)
-
-        self._residual_stack = ResidualStack(in_channels=1,
-                                             num_hidden=1,
-                                             num_residual_layers=num_residual_layers,
-                                             num_residual_hidden=1)
-        self.fc = nn.Linear(22, 10)
-
-    def forward(self, inputs):
-        batch, h, w = inputs.shape
-        x = inputs.view(batch, 1, h, w)
-        x = self._conv_1(x)
-        x = F.relu(x)
-        x = self._pool_1(x)
-
-        x = self._conv_2(x)
-        x = F.relu(x)
-        x = self._pool_2(x)
-
-        x = self._conv_3(x)
-        x = F.relu(x)
-        x = self._pool_3(x)
-
-        x = self._conv_4(x)
-        x = F.relu(x)
-        x = self._pool_4(x)
-
-        x = self._conv_5(x)
-        x = self._residual_stack(x)
-        x = x.view(batch, -1)
-        x = self.fc(x)
-        return x
-
-
-class EmbeddedWaveCNN(nn.Module):
-    def __init__(self, in_channels, num_residual_layers):
-        super(EmbeddedWaveCNN, self).__init__()
-        torch.manual_seed(seed)
-        self._conv_1 = nn.Conv1d(in_channels=in_channels,
-                                 out_channels=4,
-                                 kernel_size=15,
-                                 stride=2, padding=0, dilation=2)
-        self._pool_1 = nn.MaxPool1d(kernel_size=7, stride=1, padding=0)
-        self._conv_2 = nn.Conv1d(in_channels=4,
-                                 out_channels=2,
-                                 kernel_size=15,
-                                 stride=2, padding=0, dilation=2)
-        self._pool_2 = nn.MaxPool1d(kernel_size=3, stride=1, padding=0)
-        self._conv_3 = nn.Conv1d(in_channels=2,
-                                 out_channels=2,
-                                 kernel_size=5,
-                                 stride=2, padding=0, dilation=2)
-        self._pool_3 = nn.MaxPool1d(kernel_size=3, stride=1, padding=0)
-        self._residual_stack = ResidualStack(in_channels=2,
-                                             num_hidden=1,
-                                             num_residual_layers=num_residual_layers,
-                                             num_residual_hidden=1)
-        self._conv_4 = nn.Conv1d(in_channels=2,
-                                 out_channels=1,
-                                 kernel_size=5,
-                                 stride=2, padding=0, dilation=1)
-        self.fc = nn.Linear(21, 10)
-
-    def forward(self, inputs):
-        batch, _, _ = inputs.shape
-        x = inputs
-        x = self._conv_1(x)
-        x = F.relu(x)
-        x = self._pool_1(x)
-        x = self._conv_2(x)
-        x = F.relu(x)
-        x = self._pool_2(x)
-        x = self._conv_3(x)
-        x = F.relu(x)
-        x = self._pool_3(x)
-        x = self._residual_stack(x)
-        x = self._conv_4(x)
-        x = x.view(batch, -1)
-        x = self.fc(x)
-        return x
-
-
-class MelCNN2d(nn.Module):
+class MelCNN2d(nn.Module, ABC):
     def __init__(self, in_channels, n_classes):
         super(MelCNN2d, self).__init__()
         torch.manual_seed(seed)
