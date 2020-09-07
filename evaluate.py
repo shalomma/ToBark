@@ -17,8 +17,8 @@ if __name__ == '__main__':
     x, y = data['wave'], data['class']
 
     y_hat = model(x).argmax(axis=1)
-    y = y.detach().numpy()
-    y_hat = y_hat.detach().numpy()
+    y = y.detach().cpu().numpy()
+    y_hat = y_hat.detach().cpu().numpy()
     y = y == 3
     y_hat = y_hat == 3
 
