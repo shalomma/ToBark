@@ -14,7 +14,7 @@ if __name__ == '__main__':
     model, params = TrainCache.load(network.MelCNN2d, args.timestamp)
     loaders = loader.MelSpecEncodedLoader(prefix='CatsAndDogs', size=277, train_ratio=1).get(277)
     data = next(iter(loaders['train']))
-    x, y = data['wave'], data['class']
+    x, y = data['x'], data['y']
 
     y_hat = model(x).argmax(axis=1)
     y = y.detach().cpu().numpy()

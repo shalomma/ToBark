@@ -43,8 +43,8 @@ class Dataset(data.Dataset, ABC):
         x = torch.tensor(stack).view(-1, 16, 8)
 
         return {
-            'wave': x,
-            'class': self.y[idx]
+            'x': x,
+            'y': self.y[idx]
         }
 
 
@@ -107,6 +107,6 @@ class MelSpecEncoded:
             idx = idx.tolist()
 
         return {
-            'wave': self.data[idx],
-            'class': self.y[idx]
+            'x': self.data[idx],
+            'y': self.y[idx]
         }

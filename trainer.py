@@ -34,7 +34,7 @@ class Trainer:
             for phase in self.phases:
                 self.config.model.train() if phase == 'train' else self.config.model.eval()
                 data = next(iter(self.config.fetchers[phase]))
-                inputs, labels = data['wave'], data['class']
+                inputs, labels = data['x'], data['y']
                 self.config.optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'train'):
