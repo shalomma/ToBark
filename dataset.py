@@ -99,8 +99,8 @@ class MelSpecEncoded:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         root_dir = './data'
         if indices is not None:
-            self.data = torch.tensor([])
-            self.y = torch.tensor([])
+            self.data = torch.tensor([]).to(device)
+            self.y = torch.tensor([]).to(device)
             for prefix in prefixes:
                 with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
                     self.data = torch.cat((self.data, torch.load(f, map_location=device)))
