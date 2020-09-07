@@ -10,7 +10,7 @@ import network
 if __name__ == '__main__':
     params = {
         'epochs': 300,
-        'batch_size': 2048,
+        'batch_size': 256,
         'learning_rate': 1e-3,
         'in_channels': 1,
         'n_classes': 11
