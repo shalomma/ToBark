@@ -1,4 +1,5 @@
 import os
+import copy
 import torch
 import pickle
 import inspect
@@ -13,11 +14,12 @@ cudnn.fastest = True
 
 
 class TrainConfig:
-    def __init__(self, model, loaders, criterion, optimizer):
+    def __init__(self, model, loaders, criterion, optimizer, scheduler=None):
         self.model = model
-        self.fetchers = loaders
+        self.loaders = loaders
         self.criterion = criterion
         self.optimizer = optimizer
+        self.scheduler = scheduler
 
 
 class Trainer:
@@ -29,25 +31,42 @@ class Trainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def train(self):
+        best_acc = 0
+        best_state = None
         for i in range(self.n_epochs):
-            to_print = f'Batch {i:04}: '
+            to_print = f'Epoch {i:04}: '
             for phase in self.phases:
+                running_loss = 0.0
+                running_labels = torch.tensor([]).to(self.device)
+                running_outputs = torch.tensor([]).to(self.device)
                 self.config.model.train() if phase == 'train' else self.config.model.eval()
-                data = next(iter(self.config.fetchers[phase]))
-                inputs, labels = data['x'], data['y']
-                self.config.optimizer.zero_grad()
+                for data in self.config.loaders[phase]:
+                    inputs, labels = data['x'], data['y']
+                    self.config.optimizer.zero_grad()
 
-                with torch.set_grad_enabled(phase == 'train'):
-                    outputs = self.config.model(inputs)
+                    with torch.set_grad_enabled(phase == 'train'):
+                        outputs = self.config.model(inputs)
 
-                    loss = self.config.criterion(outputs, labels)
-                    if phase == 'train':
-                        loss.backward()
-                        self.config.optimizer.step()
+                        loss = self.config.criterion(outputs, labels)
+                        if phase == 'train':
+                            loss.backward()
+                            self.config.optimizer.step()
+                            if self.config.scheduler is not None:
+                                self.config.scheduler.step()
 
-                acc = torch.eq(labels, outputs.argmax(axis=1)).cpu().numpy().mean()
-                to_print += f'{phase} loss: {loss.item():.4f} acc: {acc:.4f}\t'
+                    running_loss += loss.item()
+                    running_labels = torch.cat((running_labels, labels))
+                    running_outputs = torch.cat((running_outputs, outputs))
+
+                acc = torch.eq(running_labels, running_outputs.argmax(dim=1)).cpu().numpy().mean()
+                loss = running_loss / len(self.config.loaders[phase].dataset)
+                to_print += f'{phase} loss: {loss:.4f} acc: {acc:.4f}\t'
+                if phase == 'val':
+                    if acc > best_acc:
+                        best_acc = acc
+                        best_state = copy.deepcopy(self.config.model.state_dict())
             print(to_print)
+        self.config.model.load_state_dict(best_state)
 
 
 class TrainCache:
