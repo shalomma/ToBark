@@ -1,8 +1,6 @@
 import os
 import torch
 import loader as ld
-import time
-import datetime
 from tqdm import tqdm
 
 
@@ -16,14 +14,11 @@ class Encoder:
     def encode(self):
         features = []
         labels = []
-        start = time.time()
         for data in tqdm(self.loader):
             features.append(data['x'])
             labels.append(data['y'])
         self.features = torch.cat(features)
         self.labels = torch.cat(labels)
-        end = time.time() - start
-        print(f'Pipeline runtime: {datetime.timedelta(seconds=int(end))}')
 
     def dump(self):
         if not os.path.exists('data'):
