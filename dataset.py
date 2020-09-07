@@ -39,10 +39,8 @@ class Dataset(data.Dataset, ABC):
         stack = np.array([
             np.mean(mel, axis=0),
             np.median(mel, axis=0),
-            np.min(mel, axis=0),
-            np.max(mel, axis=0),
             stats.skew(mel, axis=0),
-            stats.kurtosis(mel, axis=0)
+            stats.kurtosis(mel, axis=0),
         ])
         x = torch.tensor(stack).view(-1, 16, 8)
 
