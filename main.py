@@ -19,7 +19,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
 
-    model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes'])
+    model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
     summary(model, input_size=(params['in_channels'], 16, 8), device=device)
     optimizer = Adam(params=model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
