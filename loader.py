@@ -25,7 +25,7 @@ class Loader:
     def __str__(self):
         return str(self.data['train'])
 
-    def get(self, batch_size, pin_memory=True):
+    def get(self, batch_size, pin_memory=False):
         loaders = dict()
         loaders['train'] = DataLoader(self.data['train'], batch_size=batch_size, shuffle=True, pin_memory=pin_memory)
         print(f"{self.data['train']} train (size={len(self.data['train'])})")
