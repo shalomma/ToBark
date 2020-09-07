@@ -24,7 +24,7 @@ if __name__ == '__main__':
     optimizer = Adam(params=model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    loaders = loader.MelSpecEncodedLoader(prefix='urbansound8k', size=8732).get(params['batch_size'])
+    loaders = loader.MelSpecEncodedLoader(prefix='urbansound8k', size=8732).get(params['batch_size'], pin_memory=False)
 
     config = TrainConfig(model, loaders, criterion, optimizer)
     trainer = Trainer(config)
