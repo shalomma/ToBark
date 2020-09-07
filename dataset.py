@@ -36,11 +36,8 @@ class Dataset(data.Dataset, ABC):
         file_name = self.next_file_name(idx)
         x, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
         mel = librosa.feature.melspectrogram(y=x, sr=sample_rate)
-        stack = np.array([
-            np.mean(mel, axis=1),
-            np.median(mel, axis=1)
-        ])
-        x = torch.tensor(stack).view(-1, 16, 8)
+        mel = np.mean(mel, axis=1)
+        x = torch.tensor(mel).view(1, 16, 8)
 
         return {
             'x': x,
