@@ -64,11 +64,11 @@ class MelCNN2d(nn.Module, ABC):
         torch.manual_seed(seed)
         channels = [in_channels, 64, 128, 32]
         self._layers = nn.ModuleList([
-            ConvPool2d(channels[i], channels[i + 1], 2, 0.05)
+            ConvPool2d(channels[i], channels[i + 1], 2, 0.02)
             for i in range(len(channels) - 1)
         ])
 
-        self._res_layers = ResidualStack(channels[-1], 4, 16)
+        self._res_layers = ResidualStack(channels[-1], 2, 16)
 
         self.fc1 = nn.Linear(4096, 1024)
         self.fc2 = nn.Linear(1024, n_classes)
