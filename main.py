@@ -2,7 +2,7 @@ import torch
 from torch.optim import Adam
 from torchsummary import summary
 
-import loader
+import loader as ld
 from trainer import Trainer, TrainConfig, TrainCache
 import network
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     optimizer = Adam(params=model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.CrossEntropyLoss(reduction='mean')
 
-    loaders = loader.MelSpecEncodedLoader(prefix='UrbanSound8K', size=8732).get(params['batch_size'])
+    loaders = ld.MelSpecEncodedLoader(prefix='UrbanSound8K', size=8732).get(params['batch_size'])
 
     config = TrainConfig(model, loaders, criterion, optimizer)
     trainer = Trainer(config)
