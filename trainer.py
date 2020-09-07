@@ -45,7 +45,7 @@ class Trainer:
                         loss.backward()
                         self.config.optimizer.step()
 
-                acc = torch.eq(labels, outputs.argmax(axis=1)).numpy().mean()
+                acc = torch.eq(labels, outputs.argmax(axis=1)).cpu().numpy().mean()
                 to_print += f'{phase} loss: {loss.item():.4f} acc: {acc:.4f}\t'
             print(to_print)
 
