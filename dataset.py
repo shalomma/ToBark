@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import torch.utils.data as data
 from abc import ABC, abstractmethod
+import scipy.stats as stats
 
 
 class Dataset(data.Dataset, ABC):
@@ -30,11 +31,19 @@ class Dataset(data.Dataset, ABC):
 
         file_name = self.next_file_name(idx)
         x, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
-        mel = np.mean(librosa.feature.melspectrogram(y=x, sr=sample_rate).T, axis=0)
-        mel = torch.tensor(mel).view(1, 16, 8)
+        mel = librosa.feature.melspectrogram(y=x, sr=sample_rate).T
+        stack = np.array([
+            np.mean(mel, axis=0),
+            np.median(mel, axis=0),
+            np.min(mel, axis=0),
+            np.max(mel, axis=0),
+            stats.skew(mel, axis=0),
+            stats.kurtosis(mel, axis=0)
+        ])
+        x = torch.tensor(stack).view(-1, 16, 8)
 
         return {
-            'wave': mel,
+            'wave': x,
             'class': self.y[idx]
         }
 
