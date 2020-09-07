@@ -21,8 +21,9 @@ class Dataset(data.Dataset, ABC):
     def __len__(self):
         return len(self.metadata)
 
+    @abstractmethod
     def __add__(self, other):
-        return NotImplemented
+        pass
 
     @abstractmethod
     def next_file_name(self, idx):
@@ -54,30 +55,44 @@ class Dataset(data.Dataset, ABC):
 class UrbanSound8K(Dataset):
     size = 8732
 
-    def __init__(self, indices):
+    def __init__(self, indices=None):
         super(UrbanSound8K, self).__init__()
         self.root_dir = './data/UrbanSound8K/'
         self.metadata_file = os.path.join(self.root_dir, 'metadata/UrbanSound8K.csv')
-        df = pd.read_csv(self.metadata_file)
-        self.metadata = df.iloc[indices]
-        self.y = torch.tensor(self.metadata['classID'].values)
-        self.root_dir = os.path.join(self.root_dir, 'audio')
+        if indices is not None:
+            df = pd.read_csv(self.metadata_file)
+            self.metadata = df.iloc[indices]
+            self.y = torch.tensor(self.metadata['classID'].values)
+
+    def __add__(self, other):
+        obj = UrbanSound8K()
+        obj.metadata = pd.concat([self.metadata, other.metadata])
+        obj.y = torch.cat((self.y, other.y))
+        return obj
 
     def next_file_name(self, idx):
         row = self.metadata.iloc[idx]
-        return os.path.join(self.root_dir, 'fold' + str(row['fold']) + '/', row['slice_file_name'])
+        audio_dir = os.path.join(self.root_dir, 'audio')
+        return os.path.join(audio_dir, 'fold' + str(row['fold']) + '/', row['slice_file_name'])
 
 
 class CatsAndDogs(Dataset):
     size = 277
 
-    def __init__(self, indices):
+    def __init__(self, indices=None):
         super(CatsAndDogs, self).__init__()
         self.root_dir = './data/cats_dogs/'
-        self.metadata = glob.glob(self.root_dir + '*')
-        self.y = [self.parse_class(f) for f in self.metadata]
-        self.metadata = list(map(self.metadata.__getitem__, indices))
-        self.y = list(map(self.y.__getitem__, indices))
+        if indices is not None:
+            self.metadata = glob.glob(self.root_dir + '*')
+            self.y = [self.parse_class(f) for f in self.metadata]
+            self.metadata = list(map(self.metadata.__getitem__, indices))
+            self.y = list(map(self.y.__getitem__, indices))
+
+    def __add__(self, other):
+        obj = CatsAndDogs()
+        obj.metadata = self.metadata + other.metadata
+        obj.y = self.y + other.y
+        return obj
 
     @staticmethod
     def parse_class(file):
@@ -92,11 +107,11 @@ class MelSpecEncoded:
         self.prefix = prefix
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         root_dir = './data'
-        with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
-            self.data = torch.load(f, map_location=device)
-        with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
-            self.y = torch.load(f, map_location=device)
         if indices is not None:
+            with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
+                self.data = torch.load(f, map_location=device)
+            with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
+                self.y = torch.load(f, map_location=device)
             self.data = self.data[indices]
             self.y = self.y[indices]
 
