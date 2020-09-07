@@ -8,17 +8,17 @@ seed = 14
 
 
 class Residual(nn.Module, ABC):
-    def __init__(self, in_channels, num_hidden, num_residual_hidden):
+    def __init__(self, channels, num_residual_hidden):
         super(Residual, self).__init__()
         torch.manual_seed(seed)
         self._block = nn.Sequential(
             nn.ReLU(True),
-            nn.Conv1d(in_channels=in_channels,
+            nn.Conv2d(in_channels=channels,
                       out_channels=num_residual_hidden,
                       kernel_size=3, stride=1, padding=1, bias=False),
             nn.ReLU(True),
-            nn.Conv1d(in_channels=num_residual_hidden,
-                      out_channels=num_hidden,
+            nn.Conv2d(in_channels=num_residual_hidden,
+                      out_channels=channels,
                       kernel_size=1, stride=1, bias=False)
         )
 
@@ -27,11 +27,11 @@ class Residual(nn.Module, ABC):
 
 
 class ResidualStack(nn.Module, ABC):
-    def __init__(self, in_channels, num_hidden, num_residual_layers, num_residual_hidden):
+    def __init__(self, channels, num_residual_layers, num_residual_hidden):
         super(ResidualStack, self).__init__()
         torch.manual_seed(seed)
         self._num_residual_layers = num_residual_layers
-        self._layers = nn.ModuleList([Residual(in_channels, num_hidden, num_residual_hidden)
+        self._layers = nn.ModuleList([Residual(channels, num_residual_hidden)
                                       for _ in range(self._num_residual_layers)])
 
     def forward(self, x):
@@ -62,13 +62,15 @@ class MelCNN2d(nn.Module, ABC):
     def __init__(self, in_channels, n_classes):
         super(MelCNN2d, self).__init__()
         torch.manual_seed(seed)
-        channels = [in_channels, 64, 128, 64]
+        channels = [in_channels, 64, 128, 32]
         self._layers = nn.ModuleList([
-            ConvPool2d(channels[i], channels[i + 1], 3, 0.05)
+            ConvPool2d(channels[i], channels[i + 1], 2, 0.05)
             for i in range(len(channels) - 1)
         ])
 
-        self.fc1 = nn.Linear(1280, 1024)
+        self._res_layers = ResidualStack(channels[-1], 4, 16)
+
+        self.fc1 = nn.Linear(4096, 1024)
         self.fc2 = nn.Linear(1024, n_classes)
 
     def forward(self, inputs):
@@ -76,6 +78,7 @@ class MelCNN2d(nn.Module, ABC):
         x = inputs
         for layer in self._layers:
             x = layer(x)
+        x = self._res_layers(x)
         x = x.view(batch, -1)
         x = self.fc1(x)
         x = torch.tanh(x)
