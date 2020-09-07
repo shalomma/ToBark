@@ -3,6 +3,7 @@ import torch
 import loader as ld
 import time
 import datetime
+from tqdm import tqdm
 
 
 class Encoder:
@@ -16,7 +17,7 @@ class Encoder:
         features = []
         labels = []
         start = time.time()
-        for data in self.loader:
+        for data in tqdm(self.loader):
             features.append(data['x'])
             labels.append(data['y'])
         self.features = torch.cat(features)
