@@ -12,8 +12,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model, params = TrainCache.load(network.MelCNN2d, args.timestamp)
-    loaders = loader.MelSpecEncodedLoader(prefix='CatsAndDogs', size=277, train_ratio=1).get(277)
-    data = next(iter(loaders['train']))
+    loaders = loader.MelSpecEncodedLoader(prefix='CatsAndDogs', size=277, train_ratio=0.5).get_all(277)
+    data = next(iter(loaders))
     x, y = data['x'], data['y']
 
     y_hat = model(x).argmax(axis=1)
