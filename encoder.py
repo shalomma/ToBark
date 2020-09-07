@@ -1,3 +1,4 @@
+import os
 import torch
 import loader
 import time
@@ -6,7 +7,7 @@ import datetime
 
 class Encoder:
     def __init__(self, loaders, batch_size):
-        self.dataset_name = str(loaders).lower()
+        self.dataset_name = str(loaders)
         self.loaders = loaders.get(batch_size)
         self.features = []
         self.labels = []
@@ -26,9 +27,11 @@ class Encoder:
         print(f'Pipeline runtime: {datetime.timedelta(seconds=int(end))}')
 
     def dump(self):
-        with open(f'{self.dataset_name}_features.pt', 'wb') as f:
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        with open(f'data/{self.dataset_name}_features.pt', 'wb') as f:
             torch.save(self.features, f)
-        with open(f'{self.dataset_name}_labels.pt', 'wb') as f:
+        with open(f'data/{self.dataset_name}_labels.pt', 'wb') as f:
             torch.save(self.labels, f)
 
 
