@@ -16,6 +16,7 @@ class Dataset(data.Dataset, ABC):
     def __init__(self):
         self.metadata = None
         self.y = None
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     @abstractmethod
     def __call__(self, indices):
@@ -40,10 +41,10 @@ class Dataset(data.Dataset, ABC):
             idx = idx.tolist()
 
         file_name = self.next_file_name(idx)
-        x, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
-        mel = librosa.feature.melspectrogram(y=x, sr=sample_rate)
+        wave, sample_rate = librosa.load(file_name, res_type='kaiser_fast')
+        mel = librosa.feature.melspectrogram(y=wave, sr=sample_rate)
         mel = np.mean(mel, axis=1)
-        x = torch.tensor(mel).view(1, 16, 8)
+        x = torch.tensor(mel).view(1, 16, 8).to(self.device)
 
         return {
             'x': x,
@@ -62,7 +63,7 @@ class UrbanSound8K(Dataset):
     def __call__(self, indices):
         df = pd.read_csv(self.metadata_file)
         self.metadata = df.iloc[indices]
-        self.y = torch.tensor(self.metadata['classID'].values)
+        self.y = torch.tensor(self.metadata['classID'].values).to(self.device)
         return self
 
     def __add__(self, other):
@@ -88,7 +89,7 @@ class CatsAndDogs(Dataset):
         self.metadata = glob.glob(self.root_dir + '*')
         self.y = [self.parse_class(f) for f in self.metadata]
         self.metadata = [self.metadata[i] for i in indices]
-        self.y = torch.tensor([self.y[i] for i in indices])
+        self.y = torch.tensor([self.y[i] for i in indices]).to(self.device)
         return self
 
     def __add__(self, other):
@@ -116,7 +117,7 @@ class ESC50(Dataset):
     def __call__(self, indices):
         df = pd.read_csv(self.metadata_file)
         self.metadata = df.iloc[indices]
-        self.y = torch.tensor(self.metadata['target'].values)
+        self.y = torch.tensor(self.metadata['target'].values).to(self.device)
         return self
 
     def __add__(self, other):
@@ -138,7 +139,6 @@ class MelSpecEncoded(Dataset):
     def __init__(self, prefixes):
         super(MelSpecEncoded, self).__init__()
         self.prefixes = prefixes
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def __call__(self, indices):
         self.data = torch.tensor([]).to(self.device)

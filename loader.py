@@ -1,7 +1,8 @@
+import copy
+import numpy as np
 from torch import manual_seed
 from torch.utils.data import DataLoader
 from dataset import Dataset
-import numpy as np
 
 
 class Loader:
@@ -19,8 +20,8 @@ class Loader:
             'val': np.array(list(set(data_indices) - set(indices)))
         }
         self.data = {
-            'train': dataset(self.indices['train']),
-            'val': dataset(self.indices['val'])
+            'train': copy.copy(dataset(self.indices['train'])),
+            'val': copy.copy(dataset(self.indices['val']))
         }
 
     def __len__(self):
