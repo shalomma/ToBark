@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 from torchsummary import summary
 
+from dataset import MelSpecEncoded
 import loader as ld
 from trainer import Trainer, TrainConfig, TrainCache
 import network
@@ -26,7 +27,12 @@ if __name__ == '__main__':
                                             10 * params['learning_rate'], cycle_momentum=False)
     criterion = torch.nn.CrossEntropyLoss(reduction='sum')
 
-    loaders = ld.MelSpecEncodedLoader(prefixes=['UrbanSound8K', 'CatsAndDogs'], size=8732).get(params['batch_size'])
+    prefixes = ['UrbanSound8K', 'CatsAndDogs']
+    sizes = [8732, 277]
+
+    dataset = MelSpecEncoded(prefixes)
+    dataset.size = sum(sizes)
+    loaders = ld.Loader(dataset).get(params['batch_size'])
 
     config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
     trainer = Trainer(config)

@@ -1,7 +1,9 @@
 import os
 import torch
-import loader as ld
 from tqdm import tqdm
+
+import dataset as ds
+from loader import Loader
 
 
 class Encoder:
@@ -30,6 +32,6 @@ class Encoder:
 
 
 if __name__ == '__main__':
-    encoder = Encoder(ld.UrbanSound8KLoader(), batch_size=32)
+    encoder = Encoder(Loader(ds.UrbanSound8K()), batch_size=32)
     encoder.encode()
     encoder.dump()

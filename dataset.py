@@ -9,10 +9,17 @@ from abc import ABC, abstractmethod
 
 
 class Dataset(data.Dataset, ABC):
+    size = NotImplemented
+    root_dir = NotImplemented
+
+    @abstractmethod
     def __init__(self):
-        self.root_dir = None
         self.metadata = None
         self.y = None
+
+    @abstractmethod
+    def __call__(self, indices):
+        pass
 
     def __str__(self):
         return str(self.__class__.__name__)
@@ -46,15 +53,17 @@ class Dataset(data.Dataset, ABC):
 
 class UrbanSound8K(Dataset):
     size = 8732
+    root_dir = './data/UrbanSound8K/'
 
-    def __init__(self, indices=None):
+    def __init__(self):
         super(UrbanSound8K, self).__init__()
-        self.root_dir = './data/UrbanSound8K/'
         self.metadata_file = os.path.join(self.root_dir, 'metadata/UrbanSound8K.csv')
-        if indices is not None:
-            df = pd.read_csv(self.metadata_file)
-            self.metadata = df.iloc[indices]
-            self.y = torch.tensor(self.metadata['classID'].values)
+
+    def __call__(self, indices):
+        df = pd.read_csv(self.metadata_file)
+        self.metadata = df.iloc[indices]
+        self.y = torch.tensor(self.metadata['classID'].values)
+        return self
 
     def __add__(self, other):
         obj = UrbanSound8K()
@@ -70,15 +79,17 @@ class UrbanSound8K(Dataset):
 
 class CatsAndDogs(Dataset):
     size = 277
+    root_dir = './data/cats_dogs/'
 
-    def __init__(self, indices=None):
+    def __init__(self):
         super(CatsAndDogs, self).__init__()
-        self.root_dir = './data/cats_dogs/'
-        if indices is not None:
-            self.metadata = glob.glob(self.root_dir + '*')
-            self.y = [self.parse_class(f) for f in self.metadata]
-            self.metadata = [self.metadata[i] for i in indices]
-            self.y = torch.tensor([self.y[i] for i in indices])
+
+    def __call__(self, indices):
+        self.metadata = glob.glob(self.root_dir + '*')
+        self.y = [self.parse_class(f) for f in self.metadata]
+        self.metadata = [self.metadata[i] for i in indices]
+        self.y = torch.tensor([self.y[i] for i in indices])
+        return self
 
     def __add__(self, other):
         obj = CatsAndDogs()
@@ -96,15 +107,17 @@ class CatsAndDogs(Dataset):
 
 class ESC50(Dataset):
     size = 2000
+    root_dir = './data/ESC-50-master/'
 
-    def __init__(self, indices=None):
+    def __init__(self):
         super(ESC50, self).__init__()
-        self.root_dir = './data/ESC-50-master/'
         self.metadata_file = os.path.join(self.root_dir, 'meta/esc50.csv')
-        if indices is not None:
-            df = pd.read_csv(self.metadata_file)
-            self.metadata = df.iloc[indices]
-            self.y = torch.tensor(self.metadata['target'].values)
+
+    def __call__(self, indices):
+        df = pd.read_csv(self.metadata_file)
+        self.metadata = df.iloc[indices]
+        self.y = torch.tensor(self.metadata['target'].values)
+        return self
 
     def __add__(self, other):
         obj = ESC50()
@@ -118,20 +131,26 @@ class ESC50(Dataset):
         return os.path.join(audio_dir, row['filename'])
 
 
-class MelSpecEncoded:
-    def __init__(self, prefixes, indices=None):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        root_dir = './data'
-        if indices is not None:
-            self.data = torch.tensor([]).to(device)
-            self.y = torch.tensor([], dtype=torch.long).to(device)
-            for prefix in prefixes:
-                with open(os.path.join(root_dir, f'{prefix}_features.pt'), 'rb') as f:
-                    self.data = torch.cat((self.data, torch.load(f, map_location=device)))
-                with open(os.path.join(root_dir, f'{prefix}_labels.pt'), 'rb') as f:
-                    self.y = torch.cat((self.y, torch.load(f, map_location=device)))
-            self.data = self.data[indices]
-            self.y = self.y[indices]
+class MelSpecEncoded(Dataset):
+    size = None
+    root_dir = './data'
+
+    def __init__(self, prefixes):
+        super(MelSpecEncoded, self).__init__()
+        self.prefixes = prefixes
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    def __call__(self, indices):
+        self.data = torch.tensor([]).to(self.device)
+        self.y = torch.tensor([], dtype=torch.long).to(self.device)
+        for prefix in self.prefixes:
+            with open(os.path.join(self.root_dir, f'{prefix}_features.pt'), 'rb') as f:
+                self.data = torch.cat((self.data, torch.load(f, map_location=self.device)))
+            with open(os.path.join(self.root_dir, f'{prefix}_labels.pt'), 'rb') as f:
+                self.y = torch.cat((self.y, torch.load(f, map_location=self.device)))
+        self.data = self.data[indices]
+        self.y = self.y[indices]
+        return self
 
     def __str__(self):
         return str(self.__class__.__name__)
@@ -144,6 +163,9 @@ class MelSpecEncoded:
         obj.data = torch.cat((self.data, other.data))
         obj.y = torch.cat((self.y, other.y))
         return obj
+
+    def next_file_name(self, idx):
+        pass
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
