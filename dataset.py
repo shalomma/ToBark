@@ -78,7 +78,7 @@ class CatsAndDogs(Dataset):
             self.metadata = glob.glob(self.root_dir + '*')
             self.y = [self.parse_class(f) for f in self.metadata]
             self.metadata = [self.metadata[i] for i in indices]
-            self.y = [self.y[i] for i in indices]
+            self.y = torch.tensor([self.y[i] for i in indices])
 
     def __add__(self, other):
         obj = CatsAndDogs()
@@ -92,6 +92,30 @@ class CatsAndDogs(Dataset):
 
     def next_file_name(self, idx):
         return self.metadata[idx]
+
+
+class ESC50(Dataset):
+    size = 2000
+
+    def __init__(self, indices=None):
+        super(ESC50, self).__init__()
+        self.root_dir = './data/ESC-50-master/'
+        self.metadata_file = os.path.join(self.root_dir, 'meta/esc50.csv')
+        if indices is not None:
+            df = pd.read_csv(self.metadata_file)
+            self.metadata = df.iloc[indices]
+            self.y = torch.tensor(self.metadata['target'].values)
+
+    def __add__(self, other):
+        obj = ESC50()
+        obj.metadata = pd.concat([self.metadata, other.metadata])
+        obj.y = torch.cat((self.y, other.y))
+        return obj
+
+    def next_file_name(self, idx):
+        row = self.metadata.iloc[idx]
+        audio_dir = os.path.join(self.root_dir, 'audio')
+        return os.path.join(audio_dir, row['filename'])
 
 
 class MelSpecEncoded:
