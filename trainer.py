@@ -31,7 +31,8 @@ class Trainer:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def train(self):
-        best_acc = 0
+        best_metric = 0
+        best_epoch = 0
         best_state = None
         for i in range(self.n_epochs):
             to_print = f'Epoch {i:04}: '
@@ -68,11 +69,13 @@ class Trainer:
                     precision = metrics.precision_score(running_labels, running_outputs)
                     f1 = metrics.f1_score(running_labels, running_outputs)
                     to_print += f'f1: {f1:.4f} recall: {recall:.4f} precision: {precision:.4f}\t'
-                    if acc > best_acc:
-                        best_acc = acc
+                    if f1 > best_metric:
+                        best_epoch = i
+                        best_metric = f1
                         best_state = copy.deepcopy(self.config.model.state_dict())
             print(to_print)
         self.config.model.load_state_dict(best_state)
+        print(f'Best epoch: {best_epoch} ({best_metric:.4f})')
 
 
 class TrainCache:
