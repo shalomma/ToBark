@@ -15,7 +15,7 @@ if __name__ == '__main__':
     model, params = TrainCache.load(network.MelCNN2d, args.timestamp)
     dataset = MelSpecEncoded(['ESC50'])
     dataset.size = 2000
-    loaders = ld.Loader(dataset).get_all(params['batch_size'])
+    loaders = ld.Loader(params['batch_size']).get_all(dataset)
     data = next(iter(loaders))
     x, y = data['x'], data['y']
 

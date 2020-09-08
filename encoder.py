@@ -7,9 +7,9 @@ from loader import Loader
 
 
 class Encoder:
-    def __init__(self, loader, batch_size):
-        self.dataset_name = str(loader)
-        self.loader = loader.get_all(batch_size)
+    def __init__(self, dataset: ds.Dataset):
+        self.loader = Loader(batch_size=32).get_all(dataset)
+        self.dataset_name = str(dataset)
         self.features = []
         self.labels = []
 
@@ -32,6 +32,6 @@ class Encoder:
 
 
 if __name__ == '__main__':
-    encoder = Encoder(Loader(ds.UrbanSound8K()), batch_size=32)
+    encoder = Encoder(ds.UrbanSound8K())
     encoder.encode()
     encoder.dump()

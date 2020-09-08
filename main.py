@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     dataset = MelSpecEncoded(prefixes)
     dataset.size = sum(sizes)
-    loaders = ld.Loader(dataset).get(params['batch_size'])
+    loaders = ld.Loader(params['batch_size']).get(dataset)
 
     config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
     trainer = Trainer(config)
