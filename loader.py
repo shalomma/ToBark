@@ -29,8 +29,8 @@ class Loader:
         return str(self.dataset)
 
     def get(self, batch_size, pin_memory=False):
-        print(f"{self.__str__} train (size={len(self.indices['train'])})")
-        print(f"{self.__str__} val (size={len(self.indices['val'])})")
+        print(f"{self.dataset} train (size={len(self.indices['train'])})")
+        print(f"{self.dataset} val (size={len(self.indices['val'])})")
         return {
             'train': DataLoader(copy.copy(self.dataset(self.indices['train'])),
                                 batch_size=batch_size, shuffle=True, pin_memory=pin_memory),
