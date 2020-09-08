@@ -45,7 +45,7 @@ class ConvPool2d(nn.Module, ABC):
         super(ConvPool2d, self).__init__()
         torch.manual_seed(seed)
         self._block = nn.Sequential(
-            nn.BatchNorm2d(in_channels),
+            # nn.BatchNorm2d(in_channels),
             nn.Conv2d(in_channels=in_channels,
                       out_channels=out_channels,
                       kernel_size=kernel_size,
