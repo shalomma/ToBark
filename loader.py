@@ -55,6 +55,14 @@ class CatAndDogsLoader(Loader):
         self.data['val'] = dataset.CatsAndDogs(self.indices['val'])
 
 
+class ESC50Loader(Loader):
+    def __init__(self, train_ratio=0.9):
+        size = dataset.ESC50.size
+        super(ESC50Loader, self).__init__(size, train_ratio)
+        self.data['train'] = dataset.ESC50(self.indices['train'])
+        self.data['val'] = dataset.ESC50(self.indices['val'])
+
+
 class MelSpecEncodedLoader(Loader):
     def __init__(self, prefixes, size, train_ratio=0.9):
         super(MelSpecEncodedLoader, self).__init__(size, train_ratio)
