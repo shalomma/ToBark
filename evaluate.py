@@ -2,6 +2,7 @@ import argparse
 from sklearn import metrics
 
 import network
+from dataset import MelSpecEncoded
 import loader as ld
 from trainer import TrainCache
 
@@ -12,7 +13,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     model, params = TrainCache.load(network.MelCNN2d, args.timestamp)
-    loaders = ld.MelSpecEncodedLoader(prefixes=['UrbanSound8K', 'CatsAndDogs'], size=277).get_all(277)
+    dataset = MelSpecEncoded(['ESC50'])
+    dataset.size = 2000
+    loaders = ld.Loader(dataset).get_all(params['batch_size'])
     data = next(iter(loaders))
     x, y = data['x'], data['y']
 
