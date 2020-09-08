@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
     summary(model, input_size=(params['in_channels'], 16, 8))
-    optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'])
+    optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'], weight_decay=0.1)
     scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
                                             10 * params['learning_rate'], cycle_momentum=False)
     criterion = torch.nn.CrossEntropyLoss(reduction='sum')
