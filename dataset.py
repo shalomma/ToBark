@@ -141,15 +141,15 @@ class MelSpecEncoded(Dataset):
         self.prefixes = prefixes
 
     def __call__(self, indices):
-        self.data = torch.tensor([]).to(self.device)
-        self.y = torch.tensor([], dtype=torch.long).to(self.device)
+        self.data = torch.tensor([]).to('cpu')
+        self.y = torch.tensor([], dtype=torch.long).to('cpu')
         for prefix in self.prefixes:
             with open(os.path.join(self.root_dir, f'{prefix}_features.pt'), 'rb') as f:
-                self.data = torch.cat((self.data, torch.load(f, map_location=self.device)))
+                self.data = torch.cat((self.data, torch.load(f, map_location='cpu')))
             with open(os.path.join(self.root_dir, f'{prefix}_labels.pt'), 'rb') as f:
-                self.y = torch.cat((self.y, torch.load(f, map_location=self.device)))
+                self.y = torch.cat((self.y, torch.load(f, map_location='cpu')))
         self.data = self.data[indices]
-        self.y = self.y[indices]
+        self.y = self.y[indices].to(self.device)
         return self
 
     def __str__(self):
