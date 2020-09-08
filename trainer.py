@@ -62,11 +62,12 @@ class Trainer:
                 loss = running_loss / len(self.config.loaders[phase].dataset)
                 to_print += f'{phase} loss: {loss:.4f} acc: {acc:.4f}\t'
                 if phase == 'val':
-                    running_labels = running_labels.cpu().numpy()
-                    running_outputs = running_outputs.argmax(dim=1).cpu().numpy()
-                    recall = metrics.recall_score(running_labels, running_outputs, average=None)[3]
-                    precision = metrics.precision_score(running_labels, running_outputs, average=None)[3]
-                    to_print += f'recall: {recall:.4f} precision: {precision:.4f}\t'
+                    running_labels = running_labels.cpu().numpy() == 3
+                    running_outputs = running_outputs.argmax(dim=1).cpu().numpy() == 3
+                    recall = metrics.recall_score(running_labels, running_outputs)
+                    precision = metrics.precision_score(running_labels, running_outputs)
+                    f1 = metrics.f1_score(running_labels, running_outputs)
+                    to_print += f'f1: {f1:.4f} recall: {recall:.4f} precision: {precision:.4f}\t'
                     if acc > best_acc:
                         best_acc = acc
                         best_state = copy.deepcopy(self.config.model.state_dict())
