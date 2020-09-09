@@ -29,6 +29,7 @@ class Trainer:
         self.fold = 0
         self.phases = ['train', 'val']
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.pos_class = 1
 
     def train(self):
         best_metric = 0
@@ -63,8 +64,8 @@ class Trainer:
                 loss = running_loss / len(self.config.loaders[phase].dataset)
                 to_print += f'{phase} loss: {loss:.4f} acc: {acc:.4f}\t'
                 if phase == 'val':
-                    running_labels = running_labels.cpu().numpy() == 3
-                    running_outputs = running_outputs.argmax(dim=1).cpu().numpy() == 3
+                    running_labels = running_labels.cpu().numpy() == self.pos_class
+                    running_outputs = running_outputs.argmax(dim=1).cpu().numpy() == self.pos_class
                     recall = metrics.recall_score(running_labels, running_outputs)
                     precision = metrics.precision_score(running_labels, running_outputs)
                     f1 = metrics.f1_score(running_labels, running_outputs)
