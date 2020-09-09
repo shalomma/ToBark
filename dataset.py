@@ -9,8 +9,8 @@ from abc import ABC, abstractmethod
 
 
 class Dataset(data.Dataset, ABC):
-    size = NotImplemented
-    root_dir = NotImplemented
+    size = None
+    root_dir = None
     pos_class = None
 
     @abstractmethod
