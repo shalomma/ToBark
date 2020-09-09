@@ -1,5 +1,6 @@
 import os
 import torch
+import pickle
 from tqdm import tqdm
 
 import dataset as ds
@@ -29,6 +30,12 @@ class Encoder:
             torch.save(self.features, f)
         with open(f'data/{self.dataset_name}_labels.pt', 'wb') as f:
             torch.save(self.labels, f)
+        meta = {
+            'size': len(self.labels),
+            'n_classes': len(torch.unique(self.labels))
+        }
+        with open(f'data/{self.dataset_name}_meta.pt', 'wb') as f:
+            pickle.dump(meta, f)
 
 
 if __name__ == '__main__':

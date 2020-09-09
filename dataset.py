@@ -1,6 +1,7 @@
 import os
 import glob
 import torch
+import pickle
 import librosa
 import pandas as pd
 import numpy as np
@@ -139,6 +140,13 @@ class MelSpecEncoded(Dataset):
     def __init__(self, prefixes):
         super(MelSpecEncoded, self).__init__()
         self.prefixes = prefixes
+        size = 0
+        self.metadata = []
+        for prefix in prefixes:
+            with open(os.path.join(self.root_dir, f'{prefix}_meta.pt'), 'rb') as f:
+                self.metadata.append(pickle.load(f))
+            size += self.metadata[-1]['size']
+        self.size = size
 
     def __call__(self, indices):
         self.data = torch.tensor([]).to('cpu')
@@ -159,7 +167,7 @@ class MelSpecEncoded(Dataset):
         return len(self.data)
 
     def __add__(self, other):
-        obj = MelSpecEncoded(None)
+        obj = MelSpecEncoded([])
         obj.data = torch.cat((self.data, other.data))
         obj.y = torch.cat((self.y, other.y))
         return obj
