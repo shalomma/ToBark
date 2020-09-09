@@ -164,6 +164,7 @@ class IteratedDataset(data.Dataset):
 class MelSpecEncoded(Dataset):
     size = None
     root_dir = './data'
+    pos_class = 1
 
     def __init__(self, prefixes):
         super(MelSpecEncoded, self).__init__()
