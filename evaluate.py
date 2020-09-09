@@ -3,7 +3,7 @@ from sklearn import metrics
 
 import network
 from dataset import MelSpecEncoded
-import loader as ld
+import splitter as sp
 from trainer import TrainCache
 
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     if params['n_classes'] == 2:
         prefixes = [p + '_binary' for p in prefixes]
     dataset = MelSpecEncoded(prefixes)
-    loaders = ld.Loader(params['batch_size']).get_all(dataset)
+    loaders = sp.TestSplitter(batch_size=dataset.size).get_all(dataset)
 
     data = next(iter(loaders))
     x, y = data['x'], data['y']

@@ -4,19 +4,21 @@ import torch.optim as optim
 from torchsummary import summary
 
 from dataset import MelSpecEncoded
-import loader as ld
+import splitter as sp
 from trainer import Trainer, TrainConfig, TrainCache
 import network
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--epochs', type=int, help='maximal number of evaluation', default=150)
+    parser.add_argument('--epochs', type=int, help='data epochs', default=150)
+    parser.add_argument('--folds', type=int, help='k folds', default=150)
     parser.add_argument('--binary', dest='binary', help='binary classification', action='store_true')
     args = parser.parse_args()
 
     params = {
         'epochs': args.epochs,
+        'k_folds': args.folds,
         'batch_size': 256,
         'learning_rate': 5e-4,
         'weight_decay': 0.1,
@@ -25,7 +27,7 @@ if __name__ == '__main__':
         'n_classes': 2 if args.binary else 10
     }
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(device)
 
     model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
@@ -39,10 +41,11 @@ if __name__ == '__main__':
     if args.binary:
         prefixes = [p + '_binary' for p in prefixes]
     dataset = MelSpecEncoded(prefixes)
-    loaders = ld.Loader(params['batch_size']).get(dataset)
+    k_loaders = sp.KSplitter(params['batch_size'], k=args.folds).get(dataset)
 
-    config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
-    trainer = Trainer(config)
-    trainer.n_epochs = params['epochs']
-    trainer.train()
-    TrainCache().save(model, params)
+    for loaders in k_loaders:
+        config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
+        trainer = Trainer(config)
+        trainer.n_epochs = params['epochs']
+        trainer.train()
+        TrainCache().save(model, params)

@@ -4,12 +4,12 @@ import pickle
 from tqdm import tqdm
 
 import dataset as ds
-from loader import Loader
+from splitter import Splitter
 
 
 class Encoder:
     def __init__(self, dataset: ds.Dataset):
-        self.loader = Loader(batch_size=32).get_all(dataset)
+        self.loader = Splitter(batch_size=32).get_all(dataset)
         self.dataset_name = str(dataset)
         self.features = []
         self.labels = []
