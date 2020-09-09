@@ -26,8 +26,8 @@ if __name__ == '__main__':
     y_hat = model(x).argmax(axis=1)
     y = y.detach().cpu().numpy()
     y_hat = y_hat.detach().cpu().numpy()
-    y = y == 3
-    y_hat = y_hat == 3
+    y = y == dataset.pos_class
+    y_hat = y_hat == dataset.pos_class
 
     print(f'Accuracy: {metrics.accuracy_score(y, y_hat):.4f}')
     print(f'Recall: {metrics.recall_score(y, y_hat):.4f}')
