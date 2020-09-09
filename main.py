@@ -8,11 +8,11 @@ import splitter as sp
 from trainer import Trainer, TrainConfig, TrainCache
 import network
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, help='data epochs', default=150)
     parser.add_argument('--folds', type=int, help='k folds', default=10)
+    parser.add_argument('--scheduler', dest='scheduler', help='cyclicLR scheduler', action='store_true')
     parser.add_argument('--binary', dest='binary', help='binary classification', action='store_true')
     args = parser.parse_args()
 
@@ -44,8 +44,10 @@ if __name__ == '__main__':
         model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
         optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'],
                                weight_decay=params['weight_decay'])
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
-                                                10 * params['learning_rate'], cycle_momentum=False)
+        scheduler = \
+            optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
+                                        10 * params['learning_rate'], cycle_momentum=False) \
+            if args.scheduler else None
         config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
         trainer = Trainer(config)
         trainer.n_epochs = params['epochs']
