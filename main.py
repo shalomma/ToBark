@@ -14,7 +14,7 @@ if __name__ == '__main__':
         'batch_size': 256,
         'learning_rate': 1e-3,
         'in_channels': 1,
-        'n_classes': 11
+        'n_classes': 2,
     }
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -25,13 +25,10 @@ if __name__ == '__main__':
     optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'], weight_decay=0.1)
     scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
                                             10 * params['learning_rate'], cycle_momentum=False)
-    criterion = torch.nn.CrossEntropyLoss(reduction='sum')
+    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1., 2.]), reduction='sum')
 
-    prefixes = ['UrbanSound8K', 'CatsAndDogs']
-    sizes = [8732, 277]
-
+    prefixes = ['UrbanSound8K_binary', 'CatsAndDogs_binary', 'ESC50_binary']
     dataset = MelSpecEncoded(prefixes)
-    dataset.size = sum(sizes)
     loaders = ld.Loader(params['batch_size']).get(dataset)
 
     config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
