@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from torch import manual_seed
 from torch.utils.data import DataLoader
