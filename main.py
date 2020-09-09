@@ -38,11 +38,7 @@ if __name__ == '__main__':
     prefixes = ['UrbanSound8K', 'CatsAndDogs']
     if args.binary:
         prefixes = [p + '_binary' for p in prefixes]
-        dataset = MelSpecEncoded(prefixes)
-        dataset.binarize()
-    else:
-        dataset = MelSpecEncoded(prefixes)
-
+    dataset = MelSpecEncoded(prefixes)
     loaders = ld.Loader(params['batch_size']).get(dataset)
 
     config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
