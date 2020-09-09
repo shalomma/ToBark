@@ -29,9 +29,9 @@ class Loader:
         print(f"{dataset} train (size={len(self.indices['train'])})")
         print(f"{dataset} val (size={len(self.indices['val'])})")
         return {
-            'train': DataLoader(copy.copy(dataset(self.indices['train'])),
+            'train': DataLoader(dataset(self.indices['train']),
                                 batch_size=self.batch_size, shuffle=True, pin_memory=self.pin_memory),
-            'val': DataLoader(copy.copy(dataset(self.indices['val'])),
+            'val': DataLoader(dataset(self.indices['val']),
                               batch_size=self.batch_size, shuffle=True, pin_memory=self.pin_memory)
         }
 
