@@ -58,7 +58,7 @@ class KSplitter(Splitter):
         k_splits = []
         for k in range(self.k):
             print(f'Fold {k}')
-            indices = self.random(dataset.size , 1 / self.k)
+            indices = self.random(dataset.size, 1 / self.k)
             self.print(dataset, indices)
             k_splits.append({
                 'train': DataLoader(dataset(indices['train']), batch_size=self.batch_size, shuffle=True),

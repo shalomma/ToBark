@@ -12,7 +12,7 @@ import network
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--epochs', type=int, help='data epochs', default=150)
-    parser.add_argument('--folds', type=int, help='k folds', default=150)
+    parser.add_argument('--folds', type=int, help='k folds', default=10)
     parser.add_argument('--binary', dest='binary', help='binary classification', action='store_true')
     args = parser.parse_args()
 
@@ -32,9 +32,6 @@ if __name__ == '__main__':
 
     model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
     summary(model, input_size=(params['in_channels'], 16, 8))
-    optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
-    scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
-                                            10 * params['learning_rate'], cycle_momentum=False)
     criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1., params['pos_weight']]).to(device), reduction='sum')
 
     prefixes = ['UrbanSound8K', 'ESC50']
@@ -44,6 +41,11 @@ if __name__ == '__main__':
     k_loaders = sp.KSplitter(params['batch_size'], k=args.folds).get(dataset)
 
     for loaders in k_loaders:
+        model = network.MelCNN2d(in_channels=params['in_channels'], n_classes=params['n_classes']).to(device)
+        optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'],
+                               weight_decay=params['weight_decay'])
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
+                                                10 * params['learning_rate'], cycle_momentum=False)
         config = TrainConfig(model, loaders, criterion, optimizer, scheduler)
         trainer = Trainer(config)
         trainer.n_epochs = params['epochs']
