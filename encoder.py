@@ -13,6 +13,8 @@ class Encoder:
         self.dataset_name = str(dataset)
         self.features = []
         self.labels = []
+        self.pos_class = dataset.pos_class
+        print(f'Encoding: {self.dataset_name}')
 
     def encode(self):
         features = []
@@ -32,13 +34,17 @@ class Encoder:
             torch.save(self.labels, f)
         meta = {
             'size': len(self.labels),
-            'n_classes': len(torch.unique(self.labels))
+            'n_classes': len(torch.unique(self.labels)),
+            'pos_class': self.pos_class
         }
         with open(f'data/{self.dataset_name}_meta.pt', 'wb') as f:
             pickle.dump(meta, f)
+        print(meta)
 
 
 if __name__ == '__main__':
-    encoder = Encoder(ds.UrbanSound8K())
+    dataset_ = ds.UrbanSound8K()
+    dataset_.binarize()
+    encoder = Encoder(dataset_)
     encoder.encode()
     encoder.dump()
