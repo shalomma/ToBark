@@ -27,7 +27,7 @@ if __name__ == '__main__':
                                             10 * params['learning_rate'], cycle_momentum=False)
     criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1., 2.]).to(device), reduction='sum')
 
-    prefixes = ['UrbanSound8K_binary', 'CatsAndDogs_binary', 'ESC50_binary']
+    prefixes = ['UrbanSound8K_binary', 'CatsAndDogs_binary']
     dataset = MelSpecEncoded(prefixes)
     loaders = ld.Loader(params['batch_size']).get(dataset)
 
