@@ -25,7 +25,7 @@ if __name__ == '__main__':
     optimizer = optim.Adam(params=model.parameters(), lr=params['learning_rate'], weight_decay=0.1)
     scheduler = optim.lr_scheduler.CyclicLR(optimizer, params['learning_rate'],
                                             10 * params['learning_rate'], cycle_momentum=False)
-    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1., 2.]), reduction='sum')
+    criterion = torch.nn.CrossEntropyLoss(weight=torch.tensor([1., 2.]).to(device), reduction='sum')
 
     prefixes = ['UrbanSound8K_binary', 'CatsAndDogs_binary', 'ESC50_binary']
     dataset = MelSpecEncoded(prefixes)
