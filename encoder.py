@@ -15,6 +15,11 @@ class Encoder:
         self.labels = []
         self.pos_class = dataset.pos_class
         print(f'Encoding: {self.dataset_name}')
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        if not os.path.exists('data/encoded/'):
+            os.makedirs('data/encoded/')
+        self.root_dir = 'data/encoded/'
 
     def encode(self):
         features = []
@@ -26,18 +31,16 @@ class Encoder:
         self.labels = torch.cat(labels)
 
     def dump(self):
-        if not os.path.exists('data'):
-            os.makedirs('data')
-        with open(f'data/{self.dataset_name}_features.pt', 'wb') as f:
+        with open(f'{self.root_dir}/{self.dataset_name}_features.pt', 'wb') as f:
             torch.save(self.features, f)
-        with open(f'data/{self.dataset_name}_labels.pt', 'wb') as f:
+        with open(f'{self.root_dir}/{self.dataset_name}_labels.pt', 'wb') as f:
             torch.save(self.labels, f)
         meta = {
             'size': len(self.labels),
             'n_classes': len(torch.unique(self.labels)),
             'pos_class': self.pos_class
         }
-        with open(f'data/{self.dataset_name}_meta.pt', 'wb') as f:
+        with open(f'{self.root_dir}/{self.dataset_name}_meta.pt', 'wb') as f:
             pickle.dump(meta, f)
         print(meta)
 
